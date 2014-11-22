@@ -1,20 +1,10 @@
-\documentclass[%
-%draft,
-a4paper,
-11pt,
-twoside
-]{book}
-
-
+\documentclass[a4paper,11pt,twoside]{book}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%
 %%%%        PACKAGES
 %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%%%%% NÃO RETIRAR ESTES PACOTES....
 
 \usepackage[latin1]{inputenc}
 \usepackage[T1]{fontenc}
@@ -23,95 +13,38 @@ twoside
 \usepackage{palatino}
 \usepackage[vmargin=2cm,inner=3cm,outer=2cm,twoside]{geometry}
 \usepackage{graphicx}           % To include images
-\graphicspath{{Chap0/},{Chap1/Figs/},{Chap2/Figs/},{Chap3/Figs/},{Chap4/Figs/},{Chap5/Figs/},{Chap6/Figs/},{Chap7/Figs/},{Chap8/Figs/}}
+\graphicspath{{Chap0/},{Chap2/},{Chap3/}}
 \usepackage{titlesec}           % To format the headings
 \usepackage{textfit}            % To scale fonts
 \usepackage{fancyhdr}           % Configuração dos cabeçalhos
 \usepackage{setspace}
 \onehalfspacing
-%%\doublespacing
-
-
-
-
-
-
-%%%%% ... NEM ESTES
-
 \usepackage{psfrag}             % For replacement of strings in EPS files
 \usepackage{enumerate}          % Diferentes tipos de listas ordenadas
-\usepackage{url}								% self-explaining...
+\usepackage{url}		% self-explaining...
 \usepackage{subfigure}          % Figura composta por várias sub-figuras
 \usepackage{booktabs}           % Versão mais bonita das tabelas
 \usepackage{colortbl}           % Sombreados nas tabelas
 \usepackage[sort]{cite}         % Sort citations
-
 \usepackage{listings}           % Código fonte "bonito"
-%\usepackage{picins}             % ??????????? -----------------------------  debugging
-\usepackage{tocbibind}					% a bibliografia aparece na TOC -----------  debugging
-\usepackage{amssymb}            % -----------------------------------------  debugging
-\usepackage{xspace}             % -----------------------------------------  debugging
-\usepackage{amsmath} 						% -----------------------------------------  debugging
-\usepackage{bm}									% -----------------------------------------  debugging
-\usepackage{amsthm}							% -----------------------------------------  debugging
+%\usepackage{picins}             % Only works on MikTeX
+\usepackage{tocbibind}		% a bibliografia aparece na TOC
+\usepackage{amssymb}
+\usepackage{xspace}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{amsthm}
 
-
-
-\setlength{
-\parskip}{5mm}
-\setlength{
-\parindent}{0mm}
-
-
-
-
-
-%%%%% Pacotes by João Lourenço
+\setlength{\parskip}{5mm}
+\setlength{\parindent}{0mm}
 
 \usepackage{TeX/prettyref}        % To pretty print references
 \usepackage{TeX/newenvs}          % For new commands and environments
-
-
-
-%%%%% Stuff from otherTeXs
-
 \usepackage{TeX/abbrev}
 \usepackage{TeX/xyling}
 \newtheorem{definition}{Definition}
 \newtheorem{example}{Example}
 \newtheorem{theorem}{Theorem}
-
-
-
-
-
-
-%%%%% Pacotes by Luis
-
-%\usepackage{TeX/mydraft}          % My own abbreviations
-%\usepackage{TeX/abbrev}           % My own abbreviations
-
-
-
-
-%%%%% Commented
-
-%%\usepackage[portuges,english]{babel}
-%%\usepackage{ifthen}             % For conditionals in macros
-%\usepackage[breaklines]{listings}
-%%\usepackage{verbatim}
-%%\usepackage{paralist}           % Inproved list handling
-%%\usepackage{ipe}
-%%\usepackage{xypic}              % To make nice drawings
-
-
-
-
-
-
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%
@@ -120,19 +53,15 @@ twoside
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
-
-%%%%% cenas para o listings...
+%%%%% Listings
 
 \lstset{
   basicstyle=\tiny,
   numbers=left, 
   numberstyle=\tiny, 
   stepnumber=1, 
-	numbersep=5pt,
+  numbersep=5pt
 }
-
-
 
 
 %%%%% Fake blank page on \cleardoublepage
@@ -145,23 +74,14 @@ twoside
   [This page was intentionally left blank]
 \end{center}
 \vspace{\fill}
-%%\thispagestyle{empty}
 \newpage
 \if@twocolumn\hbox{}\newpage\fi\fi\fi}
 \makeatother
 
 
-
-
 %%%%% Initial directives
 
 \sloppy
-%\includeonly{macros,paral-prolog}
-
-
-
-
-
 \usepackage[english]{minitoc}   % Mini TOC in each chapter
 \setcounter{minitocdepth}{1}    % Show only sections in minitoc
 
@@ -175,27 +95,12 @@ twoside
 
 \begin{document}
 
-%\draft
 \dominitoc
 
 
 %%%%% Indexes
 
 \frontmatter
-
-
-%\dominilof[c]                   % center title of minilof's
-%\dominilot
-%\doparttoc                      % test of parttoc/partlof stuff
-%\dopartlof                      % added in version #15
-%\dopartlot                      % added in version #15
-
-%\faketableofcontents            % or \tableofcontents
-%\fakelistoffigures              % to check compatibility
-%\fakelistoftables
-
-
-
 
 
 %%%%% page numbers
@@ -206,24 +111,18 @@ twoside
 \rhead{}
 \pagenumbering{roman}
 
-
 \selectlanguage{english}
 
 
-
-
-%%%%%	  Secções iniciais
+%%%%% Secções iniciais
 
 \include{Chap0/front-page}
 \include{Chap0/ded}
 \include{Chap0/ack}
 \include{Chap0/summary}
-%\include{Chap0/symbols}
 
 
 \tableofcontents
-%\listoffigures
-%\listoftables
 
 
 \mainmatter
@@ -291,10 +190,7 @@ twoside
 
 %\include{Chap6/chap-6}       % Aditional definitions and proofs of theorems
 \include{Chap7/chap-7}       % Examples of calculation of the rWFS and the rSMs
-\include{Chap8/chap-8}			  % Implementation Source code
-
-
-
+\include{Chap8/chap-8}       % Implementation Source code
 
 
 \cleardoublepage

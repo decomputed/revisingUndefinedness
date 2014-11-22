@@ -10,3 +10,5 @@ tese.bbl
 tese.blg
 Chap?/*.aux
 presentation
+*.kilepr
+*.backup
