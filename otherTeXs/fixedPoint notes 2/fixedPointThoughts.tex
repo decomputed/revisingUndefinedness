@@ -1,0 +1,1730 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{amssymb}
+\usepackage{xspace}
+\usepackage{amsmath}
+
+
+\setlength{
+\parskip}{5mm}
+\setlength{
+\parindent}{0mm}
+
+
+\usepackage{abbrev}
+
+
+
+
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   document starts here
+%
+
+\begin{document}
+
+\title{Some thoughts on a \fpo \\
+for rSM and rWFS}
+\author{-- DRAFT VERSION --}
+\date{Luís Rodrigues Soares\\January 31st, 2006}
+
+
+
+\maketitle
+
+
+
+
+\section{A \FPO\protect\footnote{Praia da Torre version} for \RSMs}
+
+The idea in \rsms is to revise some rules of a \nlp using the principle of \emph{reductio ad absurdum}. According to this principle, rules on the form $A \leftarrow \sim A$ (odd loops) have $A$ as a model, because assuming $\sim A$ will lead us to $A$, a contradiction, an therefore we cannot assume $\sim A$ -- we assume $A$ instead.
+
+In a \nlp odd loops, whether they are direct or indirect, may or may not be present. Therefore a \fpo for \rsms (let's call it $\Gamma^{r}$, $r$ as in $revised$) should work just as well under all circumstances, i.e., with or without odd loops. Under this assumption, a first condition when thinking of an operator for \rsms is that it should perform some program transformation on the program, so that odd loops are not cut by the \go, and after that apply \go. The advantadges of such an approach seem obvious: first we would have an operator which would generalize the \go, which means, in theory, that this operator would also give the stable models of a \nlp without odd loops. Second, we would be able to use it as the \go is used, i.e., given a \twovi $I$, if $\Gamma^{r}\left(I\right)=I$ then $I$ would be a \rsm.
+
+So, how can we detect odd loops? The simplest odd loop possible is in the form
+
+\begin{center}
+\begin{math}
+a\leftarrow\sim a
+\end{math}
+\end{center}
+
+and is easily detectable. The only test needed is to check if exists a literal $\sim a$ in the tail of a rule with head $a$.
+
+However there can be an arbitrarily long finite chain of literals between $a$ and $\sim a$:
+
+\begin{align*}
+a&\leftarrow b\\
+b&\leftarrow\ldots\\
+\ldots&\leftarrow z\\
+z&\leftarrow\sim a
+\end{align*}
+
+In this kind of programs $a$ is still the model to conclude, with $b,\ldots,z$ being false. This is where the idea of a counter-factual auxiliary program enters. Counter-factual reasoning is \ldots \textbf{Need bibliography for this...}
+
+So the idea is to create a \cfap, which is basically a copy of the original program, where we assume a default literal $\sim a$ as true. If from that assumption we can conclude $a$ then $a$ was involved in an odd loop (because we started by assuming $\sim a$). Therefore $a$ should be true in the model. However, $a$ sould be the only literal we can conclude from  this auxiliary program, so all other literals are to be removed from the final model.
+
+\begin{example}
+Consider program $P$:
+
+\begin{align*}
+P=\{a&\leftarrow b\\
+b&\leftarrow\sim a\}
+\end{align*}
+
+The only \rsm is $\left\{a\right\}$, which is involved in an odd loop. The auxiliary \cfp for $a$ is
+
+\begin{align*}
+P_{cf}\left(a\right)=\{a_1&\leftarrow b_1\\
+b_1&\leftarrow\\
+a&\leftarrow a_1\}
+\end{align*}
+
+Now if we apply \go with interpretation $I=\left\{a\right\}$ to both programs we get
+
+\begin{align*}
+\Gamma_{P_{cf}\left(a\right)\cup P}\left(I\right)=\left\{a_1,b_1,a\right\}
+\end{align*}
+
+from which we cut the auxiliary literals and end up with $\left\{a\right\}$.
+
+\end{example}
+
+The single idea of a \cfp is, however, not sufficient. Consider program $P$:
+
+\begin{align*}
+P=\{a&\leftarrow\sim b\\
+b&\leftarrow\sim c\\
+c&\leftarrow\sim a\}
+\end{align*}
+
+If we tested the above considerations with $I=\left\{a,b\right\}$, a \rsm of $P$, we would get the following \cfaps:
+
+\begin{align*}
+P_cf\left(a\right)=\{a_1&\leftarrow\sim b\\
+b_1&\leftarrow\sim c\\
+c_1&\leftarrow\\
+a&\leftarrow a_1\}
+\end{align*}
+
+\begin{align*}
+P_cf\left(b\right)=\{a_2&\leftarrow\\
+b_2&\leftarrow\sim c\\
+c_2&\leftarrow\sim a\\
+b&\leftarrow b_2\}
+\end{align*}
+
+But, however,
+
+\begin{align*}
+\Gamma_{P_{cf}\left(a\right)\cup P_{cf}\left(b\right)\cup P}\left(I\right)&=\left\{b,b_1,c_1,a_2,b_2\right\}=\\
+&=\left\{b\right\}
+\end{align*}
+
+which is incomplete. $\left\{a\right\}$ never makes it to the model because all the rules where it appears in the head, either as $a$ or as auxiliary \cf literals $a_1$ and $a_2$, have default literals in the tail which are present in the tested interpretation -- these rules are cut by the \go and the \cfp for $a$ never works as it was supposed to. Then how can we get $P_{cf}\left(a\right)$ to work as it was supposed to?
+
+One possibility is to let $a_1$ depend on $b_2$. Note that $a_1$ originally depends on $\sim b$ and in the \cfap for $b$, we start precisely by assuming $\sim b$ in order to get to $b_2$. Therefore, the $\sim b$ assumption may just end up as being $b_2$ assumption, with the added advantage that the rule for $a_1$ no longer is cut by \go. Furthermore, nothing is added which wasn't already implied in the program -- if $\sim b$ takes us to $b_2$, then $a\leftarrow\sim b$ is just the same as $a_1\leftarrow b_2$.
+
+Under these assumptions, we now get a new $P_cf\left(a\right)$,
+
+\begin{align*}
+P_cf\left(a\right)=\{a_1&\leftarrow\sim b\\
+b_1&\leftarrow\sim c\\
+c_1&\leftarrow\\
+a&\leftarrow a_1\\
+a_1&\leftarrow b_2\}
+\end{align*}
+
+as well as a new $P_cf\left(b\right)$:
+
+\begin{align*}
+P_cf\left(b\right)=\{a_2&\leftarrow\\
+b_2&\leftarrow\sim c\\
+c_2&\leftarrow\sim a\\
+b&\leftarrow b_2\\
+c_2&\leftarrow a_1\}
+\end{align*}
+
+now providing us with a new result for \go:
+
+\begin{align*}
+\Gamma_{P_{cf}\left(a\right)\cup P_{cf}\left(b\right)\cup P}\left(I\right)&=\left\{a,b,a_1,b_1,c_1,a_2,b_2,c_2\right\}=\\
+&=\left\{a,b\right\}
+\end{align*}
+
+Let's now formalize the previous intuitions:
+
+
+%########################################### DEFINITION
+\begin{definition}[\CFP $P_{cf}$]
+
+Let $P$ be a \nlp with rules in the form $r_k=H\leftarrow A_{1},\ldots,A_{m},\sim B_{1},\ldots,\sim B_{n}$ ($m,n\geq 0\ and\ 1\leq k\leq l$) and $X$ a literal such that
+
+
+\begin{align*}
+\nexists_{r_k \in P}:&r_k=X\leftarrow\\
+&\wedge\\
+\exists_{r_k \in P}:&X\in \left\{B_{1},\ldots,B_{n}\right\}
+\end{align*}
+
+For each such rule $r_k$, its \cfp $P_{cf}\left(X_\iota\right)$ is the following transformation of $P$:
+
+\begin{enumerate}
+	\item Replace all non-negated literals $A$ in all rules with the auxiliary literal $A_{\iota}$;
+	\item Remove from $r_k$ the default literal $\sim X$;
+	\item Add to $P_{cf}\left(X_\iota\right)$ the rule $X\leftarrow X_{\iota}$
+\end{enumerate}
+
+The resulting program is the \cfp $P_{cf}\left(X_\iota\right)$ of $P$ regarding $X$ and a certain rule $r_\iota$. The index used ($\iota$, iota) is unique for this \cfp and this particular rule, and is called the \cf index of $P_{cf}\left(X_\iota\right)$. 
+
+\end{definition}
+
+Note, in the first place, that if a fact for $X$ already exists, no \cfp is ever necessary because $X$ is already provable.
+
+When several literals are being considered, and several rules for each literal, $\iota$ starts in 1 and increments as each new \cfp is created. Note, therefore, that in a program with several rules with the default literal considered in the tail, several different \cfaps are to be created, as these refer to the various possible paths between the default literal and the literal we are trying to prove. In a way, they are the several possible ways of proving a certain literal through \cf reasoning.
+
+Definition 1 comprises what a \cfp is, given a \nlp $P$ and a certain literal present in one or more rules. As we will be mostly dealing with interpretations we now define the set of all \cfps, given an interpretation and a \nlp.
+
+
+
+%########################################### DEFINITION
+\begin{definition}[\CFP Set]
+
+Let $P$ be a \nlp with rules in the form $r_k=H\leftarrow A_{1},\ldots,A_{m},\sim B_{1},\ldots,\sim B_{n}$ ($1\leq k\leq l$) and $I=\left\{I_{1},\ldots,I_{j}\right\}$ a set of literals such that $1\leq i\leq j$. The set of all \cfps of $P$ regarding all literals in $I$ and all rules in $P$ is the set
+
+\begin{center}
+\begin{math}
+\beta_{cf}^{I}\left(P\right) = \displaystyle\bigcup_{\iota} P_{cf}\left(X_{\iota}\right)
+\end{math}
+\end{center}
+
+with $\iota$ being the program's \cf index, incremented as a new rule or literal is considered.
+
+\end{definition}
+
+We now have a way of generating a set of auxiliary programs from a \nlp $P$ and an interpretation $I$. Next, we define the way of relating all programs in a \cfp set and generating \cfa assumptions for each program in the set. We use operator $\alpha_{cf}^{I}\left(P\right)$ for this.
+
+
+
+
+%########################################### DEFINITION
+\begin{definition}[\CFA Assumptions operator $\alpha_{cf}$]
+
+Let $P$ be a \nlp, $I=\left\{I_{1},\ldots,I_{j}\right\}$ a set of literals such that $1\leq i\leq j$ and $B$ the \cfp set obtained from the application of $\beta_{cf}^{I}\left(P\right)$.
+
+For each \cfp $P_{cf}\left(X_{\iota}\right)$ regarding a literal $X_{\iota}$ that contains a rule in the form:
+
+\begin{center}
+\begin{math}
+H_{\iota}\leftarrow A_{1},\ldots,A_{m},\sim B_{1},\ldots,\sim B_{n}
+\end{math}
+\end{center}
+
+such that 
+
+\begin{align*}
+\exists_{Y\in \left\{B_{1},\ldots,B_{n}\right\}}:&P_{cf}\left(Y\right)\in B\ \wedge\\
+&Y\neq X
+\end{align*}
+
+construct the following rule regarding $H_{\iota}$:
+
+\begin{enumerate}
+	\item $H_{\iota}$ is the head of the rule;
+	\item Add to the tail the corresponding $H_{\kappa}$, such that $\kappa$ is the \cf index identifying $P_{cf}\left(Y\right)$.
+\end{enumerate}
+
+Add the resulting rule to $P_{cf}\left(X_{\iota}\right)$. The application of $\alpha_{cf}^{I}\left(B\right)$ results in a program set with auxiliary assumptions added to each rule in $B$.
+
+\end{definition}
+
+Note that, according to the condition stating that $Y\neq X$, we never create \cfa assumptions between two \cfp regarding the same literal.
+
+Now, given $I$ and $P$, the application of $\alpha_{cf}^{I}\left(\beta_{cf}^{I}\left(P\right)\right)$ results in a \cfp set where all \cfaps share an interconnected meaning, i.e., can derive conclusions from one another.
+
+We can now define $\Gamma^r$ operator, based on the previous intuitions, as originally intended.
+
+
+
+%########################################### DEFINITION
+\begin{definition}[$\Gamma^{r}$ operator]
+
+Let $P$ be a \nlp and $I$ and interpretation. The revised program $P^{r}$ is the following sequence of operations:
+
+\begin{enumerate}
+	\item Remove from all rules in $P$ the default literal $\sim X$ such that $X$ belongs to the head of the rule;
+	\item Create the \cfp set $B^{r}=\beta_{cf}^{I}\left(P_{r}\right)$ from interpretation $I$ and the revised program $P^{r}$;
+	\item Apply the \cfa assumptions operator $\alpha_{cf}^{I}\left(B^{r}\right)$ on $B^{r}$
+	\item Let $P^{r}=P^{r}\cup \left(\bigcup \alpha_{cf}^{B^{r}}\left(I\right)\right)$
+\end{enumerate}
+
+On $P^{r}$ apply the \go and remove all \cfa literals $X_{\iota}$ from the resulting set.
+
+\end{definition}
+
+As all odd loops have been properly treated and hence won't be removed from $P^r$ by $\Gamma$, they can be considered for models. On the other hand, if no odd loops were present, the transformation wouldn't affect the program in any way such that \go would not work as if we didn't transform the program in the first place.
+
+We can now define \RSMs based on this operator.
+
+
+
+%########################################### DEFINITION
+\begin{definition}[\RSMs]
+
+Let $P$ be a \nlp and $I$ a \twovi. $I$ is a \rsm of $P$ if $I=\Gamma^{r}\left(I\right)$, i.e., $I$ is a fixed point of operator $\Gamma^{r}$.
+
+\end{definition}
+
+We can also define \RWFMs based on the previous intuitions and in a similar fashion as \WFMs are defined based on $\Gamma^2$.
+
+
+
+%########################################### DEFINITION
+\begin{definition}[\RWFS]
+
+Let $P$ be a \nlp and $I$ a \threevi. The \rwfm of $P$ is the tuple $\left\langle T,TU \right\rangle$, with $T$ (true literals) being the first fixed point of operator $\Gamma^{r^{2}}$ starting from the empty interpretation, and $TU$ (true or undefined literals) being the next iteration of $\Gamma^{r}$ from the first fixed point of $\Gamma^{r^{2}}$.
+
+\end{definition}
+
+
+
+
+\section{Tested programs and results}
+Our procedure when testing our programs is as follows:
+
+\begin{enumerate}
+	\item We start by solving direct odd loops and thus creating the revised program of $P$, $P^r$;
+	\item From $P^r$ we create all possible \cfps with their \cfa assumptions;
+	\item We then start by calculating the \rwfm of $P^r$ and then test its several \rsms.
+\end{enumerate}
+
+
+
+
+%||||||||||||||||||||||||||||||||||||||||||   PROGRAM 1
+\subsection{$a\leftarrow\sim a$}
+
+$P^r=\left\{a\leftarrow\right\}$
+
+As we don't have any default literal in $P^r$, we never create the \cfp set of $P^r$. Therefore we also never apply the \cfa assumptions operator $\alpha_{cf}$.
+
+The only \rsm is $\left\{a\right\}$.
+
+
+
+
+
+
+
+%||||||||||||||||||||||||||||||||||||||||||   PROGRAM 2
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim a$}
+
+$P^r  = P$
+
+\begin{align*}
+P_cf(a)=\{&a_1\leftarrow\sim b\\
+&b_1\leftarrow\\
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2\}
+\end{align*}
+
+\begin{align*}
+P_cf(b)=\{&a_2\leftarrow\\
+&b_2\leftarrow\sim a\\
+&b\leftarrow b_2\\
+&b_2\leftarrow a_1\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\left\{b\right\}\right)=\left\{b\right\}$
+\end{itemize}
+
+
+
+
+
+%||||||||||||||||||||||||||||||||||||||||||   PROGRAM 3
+\subsection{$a\leftarrow\sim a$\\
+$b\leftarrow\sim a$}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Pr
+
+\begin{align*}
+P^r  = \{
+&a\leftarrow\\
+&b\leftarrow\sim a
+\}
+\end{align*}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% CFs
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\\
+&b_1\leftarrow\\
+&a\leftarrow a_1
+\}
+\end{align*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{a\right\}\right)\right)=\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{a\right\},\left\{a\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{a\right\}$
+\end{itemize}
+
+
+
+
+
+
+%||||||||||||||||||||||||||||||||||||||||||   PROGRAM 4
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim c$\\
+$c\leftarrow\sim a$}
+
+
+
+\begin{align*}
+P^r  = P
+\end{align*}
+
+
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b\\
+&b_1\leftarrow\sim c\\
+&c_1\leftarrow\\
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2\\
+&b_1\leftarrow c_3
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(b)=\{
+&a_2\leftarrow\\
+&b_2\leftarrow\sim c\\
+&c_2\leftarrow\sim a\\
+&b\leftarrow b_2\\
+&b_2\leftarrow c_3\\
+&c_2\leftarrow a_1
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(c)=\{
+&a_3\leftarrow\sim b\\
+&b_3\leftarrow\\
+&c_3\leftarrow\sim a\\
+&c\leftarrow c_3\\
+&a_3\leftarrow b_2\\
+&c_3\leftarrow a_1
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,c\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a,b\right\}$
+	\item $\Gamma^r\left(\left\{b\right\}\right)=\left\{b,c\right\}$
+	\item $\Gamma^r\left(\left\{c\right\}\right)=\left\{c,a\right\}$
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{a,b\right\}$
+	\item $\Gamma^r\left(\left\{b,c\right\}\right)=\left\{b,c\right\}$
+	\item $\Gamma^r\left(\left\{c,a\right\}\right)=\left\{c,a\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+\subsection{$c\leftarrow a,\sim c$\\
+$a\leftarrow\sim b$\\
+$b\leftarrow\sim a$}
+
+
+\begin{align*}
+P^r  = \{
+&c\leftarrow a\\
+&a\leftarrow\sim b\\
+&b\leftarrow\sim a
+\}
+\end{align*}
+
+
+
+
+\begin{align*}
+P_cf(a)=\{
+&c_1\leftarrow a_1\\
+&a_1\leftarrow\sim b\\
+&b_1\leftarrow
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(b)=\{
+&c_2\leftarrow a_2\\
+&a_2\leftarrow\\
+&b_2\leftarrow\sim a
+&b\leftarrow b_2\\
+&b_2\leftarrow a_1
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,c\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b,c\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a,c\right\}$
+	\item $\Gamma^r\left(\left\{b\right\}\right)=\left\{b\right\}$
+	\item $\Gamma^r\left(\left\{c\right\}\right)=\left\{a,b,c\right\}$
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{\right\}$
+	\item $\Gamma^r\left(\left\{a,c\right\}\right)=\left\{a,c\right\}$
+	\item $\Gamma^r\left(\left\{b,c\right\}\right)=\left\{b\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim a,\sim b$\\
+$b\leftarrow\sim a,\sim b$}
+
+\begin{align*}
+P^r  = \{
+&a\leftarrow\sim b\\
+&b\leftarrow\sim a
+\}
+\end{align*}
+
+Programa já testado!
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim a,\sim b$\\
+$d\leftarrow\sim a$\\
+$b\leftarrow\sim b,d$}
+
+\begin{align*}
+P^r  = \{
+&a\leftarrow\sim b\\
+&d\leftarrow\sim a\\
+&b\leftarrow d
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b\\
+&d_1\leftarrow\\
+&b_1\leftarrow d_1
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(b)=\{
+&a_2\leftarrow\\
+&d_2\leftarrow\sim a\\
+&b_2\leftarrow d_2
+&b\leftarrow b_2\\
+&d_2\leftarrow a_1
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,d\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,d\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b,d\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\left\{b\right\}\right)=\left\{b,d\right\}$
+	\item $\Gamma^r\left(\left\{d\right\}\right)=\left\{a,b,d\right\}$
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{\right\}$
+	\item $\Gamma^r\left(\left\{a,d\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\left\{b,d\right\}\right)=\left\{b,d\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim a$\\
+$b\leftarrow\sim a,\sim b$}
+
+\begin{align*}
+P^r  = \{
+&a\leftarrow\\
+&b\leftarrow\sim a
+\}
+\end{align*}
+Programa já testado!!
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim a$\\
+$t\leftarrow a,b$\\
+$k\leftarrow\sim t$\\
+$i\leftarrow\sim k$}
+
+\begin{align*}
+P^r  = P
+\end{align*}
+
+
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b\\
+&b_1\leftarrow\\
+&t_1\leftarrow a_1,b_1\\
+&k_1\leftarrow\sim t\\
+&i_1\leftarrow\sim k\\
+&a \leftarrow a_1\\
+&a_1 \leftarrow b_2\\
+&k_1 \leftarrow t_3\\
+&i_1 \leftarrow k_4
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(b)=\{
+&a_2\leftarrow\\
+&b_2\leftarrow\sim a\\
+&t_2\leftarrow a_2,b_2\\
+&k_2\leftarrow\sim t\\
+&i_2\leftarrow\sim k\\
+&a \leftarrow b_2\\
+&b_2 \leftarrow a_1\\
+&k_2 \leftarrow t_3\\
+&i_2 \leftarrow k_4
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(t)=\{
+&a_3\leftarrow\sim b\\
+&b_3\leftarrow\sim a\\
+&t_3\leftarrow a_3,b_3\\
+&k_3\leftarrow\\
+&i_3\leftarrow\sim k\\
+&t \leftarrow t_3\\
+&a_3 \leftarrow b_2\\
+&b_3 \leftarrow a_1\\
+&i_3 \leftarrow k_4
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(k)=\{
+&a_4\leftarrow\sim b\\
+&b_4\leftarrow\sim a\\
+&t_4\leftarrow a_4,b_4\\
+&k_4\leftarrow\sim t\\
+&i_4\leftarrow\\
+&k \leftarrow k_4\\
+&a_4 \leftarrow b_2\\
+&b_4 \leftarrow a_1\\
+&k_4 \leftarrow t_3
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,t,k,i\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,t,k,i\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b,t,k,i\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a,k\right\}\right)=\left\{a,k\right\}$
+	\item $\Gamma^r\left(\left\{b,k\right\}\right)=\left\{b,k\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b$}
+
+\begin{align*}
+P^r  = P
+\end{align*}
+
+
+\begin{align*}
+P_cf(b)=\{
+&a_1\leftarrow\\
+&b\leftarrow b_1
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{a\right\}\right)\right)=\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{a\right\},\left\{a\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\left\{b\right\}\right)=\left\{\right\}$
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim a$\\
+$b\leftarrow\sim a$\\
+$c\leftarrow\sim b$\\
+$d\leftarrow\sim c$}
+
+\begin{align*}
+P^r  = \{
+&a\leftarrow\\
+&b\leftarrow\sim a\\
+&c\leftarrow\sim b\\
+&d\leftarrow\sim c
+\}
+\end{align*}
+
+
+
+\begin{align*}
+P_cf(b)=\{
+&a_1\leftarrow\\
+&b_1\leftarrow\sim a\\
+&c_1\leftarrow\\
+&d_1\leftarrow\sim c\\
+&b\leftarrow b_1\\
+&d_1\leftarrow c_2
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(c)=\{
+&a_2\leftarrow\\
+&b_2\leftarrow\sim a\\
+&c_2\leftarrow\sim b\\
+&d_2\leftarrow\\
+&c\leftarrow c_2\\
+&c_2\leftarrow b_1
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c,d\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{a\right\}\right)\right)=\Gamma^r\left(\left\{a,c,d\right\}\right)=\left\{a,c\right\}$
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{a,c\right\}\right)\right)=\Gamma^r\left(\left\{a,c\right\}\right)=\left\{a,c\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a,c\right\}\right)=\left\{a,c\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{a,c\right\},\left\{a,c\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{a,d,\ldots\right\}$
+	\item $\Gamma^r\left(\left\{a,c\right\}\right)=\left\{a,c\right\}$
+	\item $\Gamma^r\left(\left\{a,d\right\}\right)=\left\{a,c,d\right\}$
+	\item $\Gamma^r\left(\left\{a,b,c\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\left\{a,b,d\right\}\right)=\left\{a,d\right\}$
+	\item $\Gamma^r\left(\left\{a,c,d\right\}\right)=\left\{a,c\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim c$\\
+$c\leftarrow\sim d$\\
+$d\leftarrow\sim e$\\
+$e\leftarrow\sim a$}
+
+\begin{align*}
+P^r  = P
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b\\
+&b_1\leftarrow\sim c\\
+&c_1\leftarrow\sim d\\
+&d_1\leftarrow\sim e\\
+&e_1\leftarrow\\
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2\\
+&b_1\leftarrow c_3\\
+&c_1\leftarrow d_4\\
+&d_1\leftarrow e_5
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(b)=\{
+&a_2\leftarrow\\
+&b_2\leftarrow\sim c\\
+&c_2\leftarrow\sim d\\
+&d_2\leftarrow\sim e\\
+&e_2\leftarrow\sim a\\
+&b\leftarrow b_2\\
+&b_2\leftarrow c_3\\
+&c_2\leftarrow d_4\\
+&d_2\leftarrow e_5\\
+&e_2\leftarrow a_1
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(c)=\{
+&a_3\leftarrow\sim b\\
+&b_3\leftarrow
+&c_3\leftarrow\sim d\\
+&d_3\leftarrow\sim e\\
+&e_3\leftarrow\sim a\\
+&c\leftarrow c_3\\
+&a_3\leftarrow b_2\\
+&c_3\leftarrow d_4\\
+&d_3\leftarrow e_5\\
+&e_2\leftarrow a_1
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(d)=\{
+&a_4\leftarrow\sim b\\
+&b_4\leftarrow\sim c\\
+&c_4\leftarrow\\
+&d_4\leftarrow\sim e\\
+&e_4\leftarrow\sim a\\
+&d\leftarrow d_4\\
+&a_4\leftarrow b_2\\
+&b_4\leftarrow c_3\\
+&d_4\leftarrow e_5\\
+&e_2\leftarrow a_1
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(e)=\{
+&a_5\leftarrow\sim b\\
+&b_5\leftarrow\sim c\\
+&c_5\leftarrow\sim d\\
+&d_5\leftarrow\\
+&e_5\leftarrow\sim a\\
+&e\leftarrow e_5\\
+&a_5\leftarrow b_2\\
+&b_5\leftarrow c_3\\
+&c_5\leftarrow d_4\\
+&e_2\leftarrow a_1
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c,d,e\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,c,d,e\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b,c,d,e\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a,b,d\right\}\right)=\left\{b,d,a\right\}$
+	\item $\Gamma^r\left(\left\{a,b,c\right\}\right)=\left\{c,d,\ldots\right\}$
+	\item $\Gamma^r\left(\left\{a,b,e\right\}\right)=\left\{b,c,\ldots\right\}$
+	\item $\Gamma^r\left(\left\{a,c,d\right\}\right)=\left\{a,d,c\right\}$
+	\item $\Gamma^r\left(\left\{a,c,e\right\}\right)=\left\{a,c,e\right\}$
+	\item $\Gamma^r\left(\left\{a,d,e\right\}\right)=\left\{a,b,\ldots\right\}$
+	\item $\Gamma^r\left(\left\{b,c,d\right\}\right)=\left\{d,e,\ldots\right\}$
+	\item $\Gamma^r\left(\left\{b,c,e\right\}\right)=\left\{b,c,e\right\}$
+	\item $\Gamma^r\left(\left\{b,d,e\right\}\right)=\left\{b,e,d\right\}$
+	\item $\Gamma^r\left(\left\{c,d,e\right\}\right)=\left\{e,a,\ldots\right\}$
+	\item $\Gamma^r\left(\left\{a,b,c,d\right\}\right)=\left\{d\right\}$
+	\item $\Gamma^r\left(\left\{a,b,c,e\right\}\right)=\left\{c\right\}$
+	\item $\Gamma^r\left(\left\{a,b,d,e\right\}\right)=\left\{b\right\}$
+	\item $\Gamma^r\left(\left\{a,c,d,e\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\left\{b,c,d,e\right\}\right)=\left\{e\right\}$
+\end{itemize}
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b,\sim c$\\
+$b\leftarrow\sim a,\sim c$\\
+$c\leftarrow\sim a,\sim b$}
+
+\begin{align*}
+P^r  = P
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b,\sim c\\
+&b_1\leftarrow\sim c\\
+&c_1\leftarrow\sim a,\sim b\\
+&a\leftarrow a_1\\
+&a_1\leftarrow b_3,c_5\\
+&b_1\leftarrow c_6\\
+&c_1\leftarrow \sim a, b_4
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(a)=\{
+&a_2\leftarrow\sim b,\sim c\\
+&b_2\leftarrow\sim a,\sim c\\
+&c_2\leftarrow\sim b\\
+&a\leftarrow a_2\\
+&a_2\leftarrow b_3,c_5\\
+&b_2\leftarrow \sim a,c_6\\
+&c_2\leftarrow b_4
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(b)=\{
+&a_3\leftarrow\sim c\\
+&b_3\leftarrow\sim a\sim c\\
+&c_3\leftarrow\sim a,\sim b\\
+&b\leftarrow b_3\\
+&a_3\leftarrow c_5\\
+&b_3\leftarrow a_2,c_6\\
+&c_3\leftarrow a_1, b_4
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(b)=\{
+&a_4\leftarrow\sim b,\sim c\\
+&b_4\leftarrow\sim a,\sim c\\
+&c_4\leftarrow\sim a\\
+&b\leftarrow b_4\\
+&a_4\leftarrow \sim b,c_5\\
+&b_4\leftarrow a_1,c_6\\
+&c_4\leftarrow a_2
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(c)=\{
+&a_5\leftarrow\sim b\\
+&b_5\leftarrow\sim a,\sim c\\
+&c_5\leftarrow\sim a,\sim b\\
+&c\leftarrow c_5\\
+&a_5\leftarrow b_3\\
+&b_5\leftarrow a_1,\sim c\\
+&c_5\leftarrow a_2, b_4
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(c)=\{
+&a_6\leftarrow\sim b,\sim c\\
+&b_6\leftarrow\sim a\\
+&c_6\leftarrow\sim a,\sim b\\
+&c\leftarrow c_6\\
+&a_6\leftarrow b_3,\sim c\\
+&b_6\leftarrow a_1\\
+&c_6\leftarrow a_2, b_4
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,c\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b,c\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\left\{b\right\}\right)=\left\{b\right\}$
+	\item $\Gamma^r\left(\left\{c\right\}\right)=\left\{c\right\}$
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{\right\}$
+	\item $\Gamma^r\left(\left\{a,c\right\}\right)=\left\{\right\}$
+	\item $\Gamma^r\left(\left\{b,c\right\}\right)=\left\{\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim a$\\
+$c\leftarrow a,\sim c$\\
+$x\leftarrow\sim y$\\
+$y\leftarrow\sim x$\\
+$z\leftarrow\sim z,x$}
+
+\begin{align*}
+P^r  = \{
+&a\leftarrow\sim b\\
+&b\leftarrow\sim a\\
+&c\leftarrow a\\
+&x\leftarrow\sim y\\
+&y\leftarrow\sim x\\
+&z\leftarrow x
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b\\
+&b_1\leftarrow\\
+&c_1\leftarrow a\\
+&x_1\leftarrow\sim y\\
+&y_1\leftarrow\sim x\\
+&z_1\leftarrow x\\
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2\\
+&x_1\leftarrow y_4\\
+&y_1\leftarrow x_3
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(b)=\{
+&a_2\leftarrow\\
+&b_2\leftarrow\sim a\\
+&c_2\leftarrow a\\
+&x_2\leftarrow\sim y\\
+&y_2\leftarrow\sim x\\
+&z_2\leftarrow x\\
+&b\leftarrow b_2\\
+&b_2\leftarrow a_2\\
+&x_2\leftarrow y_4\\
+&y_2\leftarrow x_3
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(x)=\{
+&a_3\leftarrow\sim b\\
+&b_3\leftarrow\sim a\\
+&c_3\leftarrow a\\
+&x_3\leftarrow\sim y\\
+&y_3\leftarrow\\
+&z_3\leftarrow x\\
+&x\leftarrow x_3\\
+&a_3\leftarrow b_2\\
+&x_3\leftarrow y_4\\
+&b_3\leftarrow a_1
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(y)=\{
+&a_4\leftarrow\sim b\\
+&b_4\leftarrow\sim a\\
+&c_4\leftarrow a\\
+&x_4\leftarrow\\
+&y_4\leftarrow\sim x\\
+&z_4\leftarrow x\\
+&y\leftarrow y_4\\
+&a_4\leftarrow b_2\\
+&b_4\leftarrow a_1\\
+&y_4\leftarrow x_3
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c,x,y,z\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,c,x,y,z\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b,c,x,y,z\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{b,y\right\}\right)=\left\{b,y\right\}$
+	\item $\Gamma^r\left(\left\{b,x,z\right\}\right)=\left\{b,x,z\right\}$
+	\item $\Gamma^r\left(\left\{a,c,y\right\}\right)=\left\{a,c,y\right\}$
+	\item $\Gamma^r\left(\left\{a,c,x,z\right\}\right)=\left\{a,c,x,z\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim a,c$\\
+$c\leftarrow a$}
+
+\begin{align*}
+P^r  = P
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b\\
+&b_1\leftarrow c_1\\
+&c_1\leftarrow a_1\\
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(b)=\{
+&a_2\leftarrow\\
+&b_2\leftarrow\sim a,c_2\\
+&c_2\leftarrow a_2\\
+&b\leftarrow b_2\\
+&b_2\leftarrow a_1,c_2
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,c\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b,c\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a,c\right\}$
+	\item $\Gamma^r\left(\left\{b\right\}\right)=\left\{b\right\}$
+	\item $\Gamma^r\left(\left\{c\right\}\right)=\left\{a,b,c\right\}$
+	\item $\Gamma^r\left(\left\{a,c\right\}\right)=\left\{a,c\right\}$
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{\right\}$
+	\item $\Gamma^r\left(\left\{b,c\right\}\right)=\left\{b\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim a,c$\\
+$c\leftarrow a$\\
+$x\leftarrow\sim y$\\
+$y\leftarrow\sim x,z$\\
+$z\leftarrow x$}
+
+Generalização do programa anterior.
+
+
+
+
+
+\subsection{$a\leftarrow x$\\
+$x\leftarrow y$\\
+$y\leftarrow\sim a$}
+
+\begin{align*}
+P^r  = P
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow x_1\\
+&x_1\leftarrow y_1\\
+&y_1\leftarrow\\
+&a\leftarrow a_1
+\}
+\end{align*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,x,y\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{a\right\}\right)\right)=\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{a\right\},\left\{a\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\left\{x\right\}\right)=\left\{a,x,y\right\}$
+	\item $\Gamma^r\left(\left\{y\right\}\right)=\left\{a,x,y\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim a$\\
+$c\leftarrow a,d,\sim c$\\
+$d\leftarrow\sim d$\\
+$e\leftarrow f$\\
+$g\leftarrow\sim h$\\
+$i\leftarrow\sim i,d$}
+
+\begin{align*}
+P^r  = \{
+&a\leftarrow\sim b\\
+&b\leftarrow\sim a\\
+&c\leftarrow a,d\\
+&d\leftarrow\\
+&e\leftarrow f\\
+&g\leftarrow\sim h\\
+&i\leftarrow d
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b\\
+&b_1\leftarrow\\
+&c_1\leftarrow a,d\\
+&d_1\leftarrow\\
+&e_1\leftarrow f\\
+&g_1\leftarrow\sim h\\
+&i_1\leftarrow d\\
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2\\
+&g_1\leftarrow h_3
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(b)=\{
+&a_2\leftarrow\\
+&b_2\leftarrow\sim a\\
+&c_2\leftarrow a,d\\
+&d_2\leftarrow\\
+&e_2\leftarrow f\\
+&g_2\leftarrow\sim h\\
+&i_2\leftarrow d\\
+&a\leftarrow a_1\\
+&b_2\leftarrow a_1\\
+&g_2\leftarrow h_3
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(h)=\{
+&a_3\leftarrow\sim b\\
+&b_3\leftarrow\sim a\\
+&c_3\leftarrow a,d\\
+&d_3\leftarrow\\
+&e_3\leftarrow f\\
+&g_3\leftarrow\\
+&i_3\leftarrow d\\
+&h\leftarrow h_3\\
+&a_3\leftarrow b_2\\
+&b_3\leftarrow a_1
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c,d,g,i\right\}\right)=\left\{g,d,i\right\}$
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{g,d,i\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c,g,d,i\right\}\right)=\left\{g,d,i\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{g,d,i\right\}\right)=\left\{a,b,c,g,d,i\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{g,d,i\right\},\left\{a,b,c,g,d,i\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a,c,g,d,i\right\}\right)=\left\{a,c,g,d,i\right\}$
+	\item $\Gamma^r\left(\left\{b,g,d,i\right\}\right)=\left\{b,g,d,i\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim a$\\
+$c\leftarrow\sim c,a$\\
+$c\leftarrow\sim c,b$\\
+$d\leftarrow\sim d,b$}
+
+
+\begin{align*}
+P^r  = \{
+&a\leftarrow\sim b\\
+&b\leftarrow\sim a\\
+&c\leftarrow a\\
+&c\leftarrow b\\
+&d\leftarrow b
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b\\
+&b_1\leftarrow\\
+&c_1\leftarrow a_1\\
+&c_1\leftarrow b_1\\
+&d_1\leftarrow b_1\\
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(b)=\{
+&a_2\leftarrow\\
+&b_2\leftarrow\sim a\\
+&c_2\leftarrow a_2\\
+&c_2\leftarrow b_2\\
+&d_2\leftarrow b_2\\
+&b\leftarrow b_2\\
+&b_2\leftarrow a_1
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c,d\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,c,d\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b,c,d\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a,c\right\}\right)=\left\{a,c\right\}$
+	\item $\Gamma^r\left(\left\{b,c,d\right\}\right)=\left\{b,c,d\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+
+\subsection{$a\leftarrow\sim b$\\
+$b\leftarrow\sim c,x$\\
+$c\leftarrow\sim a$\\
+$x\leftarrow\sim x,a$}
+
+
+\begin{align*}
+P^r  = \{
+&a\leftarrow\sim b\\
+&b\leftarrow\sim c,x\\
+&c\leftarrow\sim a\\
+&x\leftarrow a
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow\sim b\\
+&b_1\leftarrow\sim c,x_1\\
+&c_1\leftarrow\\
+&x_1\leftarrow a_1\\
+&a\leftarrow a_1\\
+&a_1\leftarrow b_2\\
+&b_1\leftarrow c_3,x_1
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(b)=\{
+&a_2\leftarrow\\
+&b_2\leftarrow\sim c,x_2\\
+&c_2\leftarrow\sim a\\
+&x_2\leftarrow a_2\\
+&b\leftarrow b_1\\
+&c_2\leftarrow a_1\\
+&b_2\leftarrow c_3,x_2
+\}
+\end{align*}
+
+
+\begin{align*}
+P_cf(c)=\{
+&a_3\leftarrow\sim b\\
+&b_3\leftarrow x_3\\
+&c_3\leftarrow\sim a\\
+&x_3\leftarrow a_3\\
+&c\leftarrow c_3\\
+&a_3\leftarrow b_2\\
+&c_3\leftarrow a_1
+\}
+\end{align*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,b,c,x\right\}\right)=\left\{\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{\right\}\right)=\left\{a,b,c,x\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{\right\},\left\{a,b,c,x\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{a,b,x\right\}$
+	\item $\Gamma^r\left(\left\{b,c\right\}\right)=\left\{b,c\right\}$
+	\item $\Gamma^r\left(\left\{c,a\right\}\right)=\left\{a,x,\ldots\right\}$
+	\item $\Gamma^r\left(\left\{a,b,x\right\}\right)=\left\{a,b,x\right\}$
+	\item $\Gamma^r\left(\left\{a,c,x\right\}\right)=\left\{a,c,x\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+
+
+\subsection{$a\leftarrow x$\\
+$x\leftarrow\sim a$\\
+$b\leftarrow y$\\
+$y\leftarrow\sim a$\\
+$c\leftarrow\sim b$}
+
+\begin{align*}
+P^r  = P
+\end{align*}
+
+
+
+
+
+
+\begin{align*}
+P_cf(a)=\{
+&a_1\leftarrow x_1\\
+&x_1\leftarrow\\
+&b_1\leftarrow y_1\\
+&y_1\leftarrow\sim a\\
+&c_1\leftarrow\sim b\\
+&a\leftarrow a_1\\
+&c_1\leftarrow b_3
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(a)=\{
+&a_2\leftarrow x_2\\
+&x_2\leftarrow \sim a\\
+&b_2\leftarrow y_2\\
+&y_2\leftarrow\\
+&c_2\leftarrow\sim b\\
+&a\leftarrow a_2\\
+&c_2\leftarrow b_3
+\}
+\end{align*}
+
+\begin{align*}
+P_cf(b)=\{
+&a_3\leftarrow x_3\\
+&x_3\leftarrow\sim a\\
+&b_3\leftarrow y_3\\
+&y_3\leftarrow\sim a\\
+&c_3\leftarrow\\
+&b\leftarrow b_3\\
+&x_3\leftarrow a_1\\
+&y_3\leftarrow a_2
+\}
+\end{align*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rWF
+\subsubsection{\rwfm}
+
+\begin{enumerate}
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{\right\}\right)\right)=\Gamma^r\left(\left\{a,x,b,y,c\right\}\right)=\left\{a\right\}$
+	\item $\Gamma^r\left(\Gamma^r\left(\left\{a\right\}\right)\right)=\Gamma^r\left(\left\{a,c\right\}\right)=\left\{a,c\right\}$
+\end{enumerate}
+
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a,c\right\}\right)=\left\{a,c\right\}$
+\end{itemize}
+
+\begin{center}
+$rWFM=\left\langle \left\{a,c\right\},\left\{a,c\right\} \right\rangle$
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% rSM
+\subsubsection{\rsms}
+\begin{itemize}
+	\item $\Gamma^r\left(\left\{a,b\right\}\right)=\left\{a\right\}$
+\end{itemize}
+
+
+
+
+
+
+
+
+
+\end{document}

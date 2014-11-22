@@ -1,0 +1,303 @@
+\documentclass[%
+%draft,
+a4paper,
+11pt,
+twoside
+]{book}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%
+%%%%        PACKAGES
+%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%% NÃO RETIRAR ESTES PACOTES....
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english,portuges]{babel}
+\usepackage{pslatex}
+\usepackage{palatino}
+\usepackage[vmargin=2cm,inner=3cm,outer=2cm,twoside]{geometry}
+\usepackage{graphicx}           % To include images
+\graphicspath{{Chap0/},{Chap1/Figs/},{Chap2/Figs/},{Chap3/Figs/},{Chap4/Figs/},{Chap5/Figs/},{Chap6/Figs/},{Chap7/Figs/},{Chap8/Figs/}}
+\usepackage{titlesec}           % To format the headings
+\usepackage{textfit}            % To scale fonts
+\usepackage{fancyhdr}           % Configuração dos cabeçalhos
+\usepackage{setspace}
+\onehalfspacing
+%%\doublespacing
+
+
+
+
+
+
+%%%%% ... NEM ESTES
+
+\usepackage{psfrag}             % For replacement of strings in EPS files
+\usepackage{enumerate}          % Diferentes tipos de listas ordenadas
+\usepackage{url}								% self-explaining...
+\usepackage{subfigure}          % Figura composta por várias sub-figuras
+\usepackage{booktabs}           % Versão mais bonita das tabelas
+\usepackage{colortbl}           % Sombreados nas tabelas
+\usepackage[sort]{cite}         % Sort citations
+
+\usepackage{listings}           % Código fonte "bonito"
+%\usepackage{picins}             % ??????????? -----------------------------  debugging
+\usepackage{tocbibind}					% a bibliografia aparece na TOC -----------  debugging
+\usepackage{amssymb}            % -----------------------------------------  debugging
+\usepackage{xspace}             % -----------------------------------------  debugging
+\usepackage{amsmath} 						% -----------------------------------------  debugging
+\usepackage{bm}									% -----------------------------------------  debugging
+\usepackage{amsthm}							% -----------------------------------------  debugging
+
+
+
+\setlength{
+\parskip}{5mm}
+\setlength{
+\parindent}{0mm}
+
+
+
+
+
+%%%%% Pacotes by João Lourenço
+
+\usepackage{TeX/prettyref}        % To pretty print references
+\usepackage{TeX/newenvs}          % For new commands and environments
+
+
+
+%%%%% Stuff from otherTeXs
+
+\usepackage{TeX/abbrev}
+\usepackage{TeX/xyling}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
+
+
+
+
+
+
+%%%%% Pacotes by Luis
+
+%\usepackage{TeX/mydraft}          % My own abbreviations
+%\usepackage{TeX/abbrev}           % My own abbreviations
+
+
+
+
+%%%%% Commented
+
+%%\usepackage[portuges,english]{babel}
+%%\usepackage{ifthen}             % For conditionals in macros
+%\usepackage[breaklines]{listings}
+%%\usepackage{verbatim}
+%%\usepackage{paralist}           % Inproved list handling
+%%\usepackage{ipe}
+%%\usepackage{xypic}              % To make nice drawings
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%
+%%%%        INITIAL DEFINITIONS
+%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%% cenas para o listings...
+
+\lstset{
+  basicstyle=\tiny,
+  numbers=left, 
+  numberstyle=\tiny, 
+  stepnumber=1, 
+	numbersep=5pt,
+}
+
+
+
+
+%%%%% Fake blank page on \cleardoublepage
+
+\makeatletter
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+\hbox{}
+\vspace*{\fill}
+\begin{center}
+  [This page was intentionally left blank]
+\end{center}
+\vspace{\fill}
+%%\thispagestyle{empty}
+\newpage
+\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother
+
+
+
+
+%%%%% Initial directives
+
+\sloppy
+%\includeonly{macros,paral-prolog}
+
+
+
+
+
+\usepackage[english]{minitoc}   % Mini TOC in each chapter
+\setcounter{minitocdepth}{1}    % Show only sections in minitoc
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%
+%%%%        THE MAIN DOCUMENT
+%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%\draft
+\dominitoc
+
+
+%%%%% Indexes
+
+\frontmatter
+
+
+%\dominilof[c]                   % center title of minilof's
+%\dominilot
+%\doparttoc                      % test of parttoc/partlof stuff
+%\dopartlof                      % added in version #15
+%\dopartlot                      % added in version #15
+
+%\faketableofcontents            % or \tableofcontents
+%\fakelistoffigures              % to check compatibility
+%\fakelistoftables
+
+
+
+
+
+%%%%% page numbers
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{\nouppercase{\textsc{\leftmark}}}
+\rhead{}
+\pagenumbering{roman}
+
+
+\selectlanguage{english}
+
+
+
+
+%%%%%	  Secções iniciais
+
+\include{Chap0/front-page}
+\include{Chap0/ded}
+\include{Chap0/ack}
+\include{Chap0/summary}
+%\include{Chap0/symbols}
+
+
+\tableofcontents
+%\listoffigures
+%\listoftables
+
+
+\mainmatter
+
+
+%%%%% page numbers again
+
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[RO,LE]{\leftmark\hfill\rightmark}
+\renewcommand{\chaptermark}[1]{\markboth{\fontfamily{phv}\selectfont\footnotesize
+    \thechapter.\ \textsc{#1}}{}}
+\renewcommand{\sectionmark}[1]{\markright{\fontfamily{phv}\selectfont\footnotesize\thesection.\ #1}}
+\pagenumbering{arabic}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%
+%%%%        THE CHAPTERS
+%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\include{Chap1/chap-1}       % Introduction
+\include{Chap2/chap-2}       % State of the Art
+\include{Chap3/chap-3}       % Revised Well-Founded Semantics
+\include{Chap4/chap-4}       % Extending Gama-R operator to rSMs
+\include{Chap5/chap-5}       % Concluding Remarks and Future work
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%
+%%%%        REFERENCES
+%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\fancyhead{}
+\lhead{\nouppercase{\textsc{\leftmark}}}
+\rhead{}
+
+\bibliographystyle{abbrv}
+\bibliography{Bib/revising,Bib/prolog,Bib/rsm,Bib/extended,Bib/sm,Bib/wfs,Bib/history,Bib/nmr}
+
+%%%%% NO CITES...
+\nocite{nmrGrigoris}
+\nocite{californication}
+%\nocite{prolegomena}
+\nocite{lostNotes}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%
+%%%%        APENDIXES
+%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix
+
+%\include{Chap6/chap-6}       % Aditional definitions and proofs of theorems
+\include{Chap7/chap-7}       % Examples of calculation of the rWFS and the rSMs
+\include{Chap8/chap-8}			  % Implementation Source code
+
+
+
+
+
+\cleardoublepage
+
+\end{document}
+

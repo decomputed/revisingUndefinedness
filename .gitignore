@@ -1,0 +1,10 @@
+encryptDecrypt.*
+presentation.*
+*.mtc*
+tese.log
+tese.maf
+tese.aux
+tese.pdf
+tese.toc
+tese.bbl
+tese.blg

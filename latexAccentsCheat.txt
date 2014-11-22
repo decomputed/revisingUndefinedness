@@ -1,0 +1,6 @@
+Backwards (grave) accent    \`{x}
+Forward (acute) accent      \'{x}
+Caret symbol                \^{x}
+Dieresis (umlaut)           \"{x}
+Tilde                       \~{x}
+ç 									 \c{c}

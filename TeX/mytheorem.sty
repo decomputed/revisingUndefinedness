@@ -1,0 +1,28 @@
+\usepackage{color,fancybox}
+
+\newcounter{cpmytheorem}
+\newlength{\theoremwidth}
+\addtolength {\theoremwidth}{\textwidth}
+\addtolength {\theoremwidth}{-4em}
+
+\newenvironment{mytheorem}[1]%
+  {% 
+    \vspace{2ex}
+    \indent
+    \begin{Sbox}%
+      \begin{minipage}{\theoremwidth}%
+        \vspace{-1.5em}
+        \hspace{-7.2ex}
+        \colorbox{white}{\textbf{#1}\ }\\\nopagebreak\itshape
+  }
+  {\end{minipage}\end{Sbox}
+\fboxsep 1em
+\fbox{\TheSbox}\vspace{0.8em}\\
+\fboxsep 0em
+}
+
+
+\newenvironment{defi}[1]%
+{\refstepcounter{cpmytheorem}\label{defi:#1}
+ \begin{mytheorem}{Definition \ref{defi:#1}}}
+{\end{mytheorem}}

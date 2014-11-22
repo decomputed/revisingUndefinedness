@@ -1,0 +1,1524 @@
+%%#################################################################
+%% CHAPTER 4.
+%%#################################################################
+\chapter{Transformational semantics and additional properties}
+\label{cha:grExtension}
+
+
+
+\begin{ChapAbstract}
+Where we propose a syntactic transformation based on a new property of the \rsms, which enables us to calculate the \rsms and the \rwfm of a program. While providing this bridge to the previous results of the rSMs, we also show that all their properties still maintain, as well as those of the rWFS.
+\end{ChapAbstract}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+In the previous chapter we defined the \RWFS, a three-valued extension of the \RSMs Semantics. This definition, although being easy to reason about  at a conceptual higher level, is not easy to translate in terms of a set of automated operations. This difficulty results on the unavoidable operational notion behind RAA patterns - the notion of \emph{odd loop} and \emph{chain of support}. These notions are not easy to deal with by means of automatic operations because they involve going through chains of support to detect RAA patterns. For arbitrarily long programs, the complexity cost of these operations would be immense -- only to see if literals are in OLONs, not to mention the actual calculation of the model.
+
+However, at the core of the definition stands the calculation of the \wfm of the original program united with certain RAA patterns. This suggests that if the problem of detecting RAA patterns could be solved, a transformational semantics would be easier to define.
+
+In this chapter we study such transformational semantics. We start with a fresh look on RAA patterns and study their behavior on the \rsms semantics. We then discuss the property of \emph{RAA Rule Extension}, unknown in the context of the rSMs and use this property to define a syntactic theoretical approach to solving RAA patterns. With these results, we define an extension of the \go -- the \gro, and show how it can be used to calculate rSMs and the rWFM of a NLP. With these two new definitions we show that the properties of rSMs and the rWFS still hold and show examples of its calculation. We then conclude with some open issues.
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Further Explorations in \RSMs}
+
+From the RAA patterns we have identified so far ($OLONs^{d}$, $OLONs^{i}$ and $ICONs$), we use $OLONs^{d}$ and $ICONs$ in the calculation of the rWFM. The solving of each of these patterns by RAA is actually the calculation of the \rsm of each pattern, which we add to the original program when calculating the rWFS. This is why we don't consider $OLONs^{i}$ -- they generally result in several different models which we don't want to consider as part of the \rwfm\footnote{Several rSMs represent choices at a two-valued level, i.e., undefinedness at a three-valued level.}.
+
+One of the ways of looking at the problem of why programs with RAA patterns don't have \sms, is because RAA patterns can't be solved with classical support. Therefore, one possible approach to this problem is trying to determine what a program would need to have so that RAA patterns would have classical support. This is the motivation behind the property of RAA Rule Extension. This property applies to all program patterns solvable by \raa and consists on complementing each pattern with a single rule whose meaning is the reasoning behind its RAA resolution. This rule, we'll later see in this section, if added to the original program will allow the \sms of the transformed program to coincide with the \rsms of the original program. This result is of great importance since it not only means that RAA reasoning for a given program can be captured with a single rule, but also that given this transformation, the \sms semantics will always coincide with the \rsms thus enjoying all the properties it missed.
+
+
+\subsection{RAA Rule Extension}
+We'll now introduce the property of RAA Rule Extension through several examples of RAA pattern situations.
+
+\begin{example}[Simple Direct OLON]
+Let's recall the RAA patterns we described in section \ref{subsec:preliminary}. The reasoning behind OLONS, whether they are direct or indirect, is always the same: if a certain atom is dependent on its own negation it should be true provided that the set of preconditions (possibly) present in the OLON are also true. 
+
+To this idea we now add the following: the head of the OLON will be true if, in particular, the tail of the OLON (the head of the rule that depends on the negation of the head of the OLON) is false. As an example consider:
+\begin{align*}
+P=\{ &a  \leftarrow x\\
+ &x  \leftarrow y\\
+ &y  \leftarrow \sim a\}
+\end{align*}
+
+We know that $a$ is true by RAA reasoning. It fails as a \sm because it lacks classical support. Now consider adding the following rule to the program:
+\begin{align*}
+ &a \leftarrow \sim y
+\end{align*}
+
+This rule states that $a$ should be true by \raa if $y$ is false. In other words, having identified an OLON in $a$, we know that its RAA chain of support is to be false. In particular, the last literal in the RAA chain of support has to be false, thus rendering the whole chain false. Because $y$ is true if $a$ is false, we end up generating an even loop over negation between $y$ and $a$. It will never actually become an even loop because $y$ will imply a set of atoms that eventually results in $a$, thus being contradictory. Therefore, $y$ will never be true and $a$ will be. Our revised program would therefore be:
+\begin{align*}
+P^{r}=\{ &a  \leftarrow x\\
+ &x \leftarrow y\\
+ &y \leftarrow \sim a\\
+ &a \leftarrow \sim y\}
+\end{align*}
+
+\end{example}
+
+What this rule added to the program was the reasoning behind the RAA resolution of literal $a$. This resolution has to go through two steps: the first one being the identification of the OLON, and the second one the identification of the conditions that have to be satisfied in order for a certain literal that belongs to an OLON to have classical support. $a$, which is part of an OLON, is true if $y$ is false. We call $y$ the tail of the OLON.
+
+\begin{example}[Direct OLON with preconditions]
+If we have preconditions in our OLON, they have to be true in order for the OLON to be active. In these cases, the rule we add must contemplate this. Consider a new program:
+\begin{align*}
+P=\{ &a  \leftarrow x,i\\
+ &x  \leftarrow y,j\\
+ &y  \leftarrow \sim a,k\}
+\end{align*}
+
+Besides the fact that $y$ has to be false, it's also necessary for $i$, $j$ and $k$ to be true. Therefore, the rule we generate is:
+\begin{align*}
+&a  \leftarrow \sim y,i,j,k
+\end{align*}
+
+where $\sim y$ is the tail of the RAA chain of support and $i$, $j$ and $k$ are the preconditions of the OLON.
+\end{example}
+
+
+\begin{example}[Preconditions which are RAA chains of support]
+When contemplating preconditions, we have the special case when preconditions are chains of support for the same OLON:
+\begin{align*}
+ P=\{&a  \leftarrow x,y\\
+ &x  \leftarrow z\\
+ &y  \leftarrow w\\
+ &z  \leftarrow \sim a\\
+ &w  \leftarrow \sim a\}
+\end{align*}
+
+Apparently, following the reasoning we set in the previous examples, we should add the rule
+\begin{align*}
+ a & \leftarrow \sim z,y, \sim w,x
+\end{align*}
+
+However, both $x$ and $y$ are preconditions that result in the same OLON, so each of them is already implied by the fact that it belongs to the OLON's chain of support. So, the rule we have to add is 
+\begin{align*}
+ a & \leftarrow \sim z, \sim w
+\end{align*}
+
+generating the program:
+\begin{align*}
+ P=\{&a  \leftarrow x,y\\
+ &x  \leftarrow z\\
+ &y  \leftarrow w\\
+ &z  \leftarrow \sim a\\
+ &w  \leftarrow \sim a\\
+ &a  \leftarrow \sim z, \sim w\}
+\end{align*}
+\end{example}
+
+\begin{example}
+Consider another example:
+\begin{align*}
+ P=\{&a  \leftarrow x\\
+ &x  \leftarrow y,z\\
+ &y  \leftarrow \sim a\\
+ &z  \leftarrow \sim z\}
+\end{align*}
+
+In this case, $z$ is part of an OLON chain of support but it is not for the same head. Therefore, we add it as a precondition for the OLON of $a$. As $z$ is also an OLON, but a direct one without any other rules in between, we simply add it as a fact, because there is no tail of the RAA chain of support here.
+\begin{align*}
+ a & \leftarrow \sim y, z\\
+ z & \leftarrow
+\end{align*}
+\end{example}
+
+
+\begin{example}[Indirect OLONs]
+So far we only dealt with direct OLONs. How are indirect OLONs dealt with?
+\begin{align*}
+ P=\{&a  \leftarrow \sim b\\
+ &b  \leftarrow \sim c\\
+ &c  \leftarrow \sim a\}
+\end{align*}
+
+$P$ has three \rsms, which have its core in the three literals that can be proven by RAA. The intuition so far is the same as in the previous examples: $a$ is provable by RAA if $c$ is false:
+\begin{align*}
+ a & \leftarrow \sim c
+\end{align*}
+
+$b$ is true if $a$ is false:
+\begin{align*}
+ b & \leftarrow \sim a
+\end{align*}
+ 
+and finally, $c$ is true if $b$ is false:
+\begin{align*}
+c & \leftarrow \sim b
+\end{align*}
+
+So these are the three rules we need to add to $P$.
+\end{example}
+
+\begin{example}[Indirect OLON with preconditions]
+What happens if we have preconditions? Consider:
+\begin{align*}
+P=\{ &a  \leftarrow \sim b\\
+ &b  \leftarrow \sim c,x\\
+ &c  \leftarrow \sim a\}
+\end{align*}
+
+Apparently $x$ should be added to all rules as part of the preconditions set. However, $x$ only interferes with rSMs with $b$ and $c$ cores\footnote{Result from \cite{ampMSc}, also mentioned in section \ref{subsec:preliminary} and definition \ref{def:olon}}: assuming $\sim a$ as true gives us $c$. Independently of the truth value of $x$, $b$ will always be false thus rendering $a$ true by RAA. The rules to add are:
+\begin{align*}
+ a & \leftarrow \sim c\\
+ b & \leftarrow \sim a,x\\
+ c & \leftarrow \sim b,x
+\end{align*}
+
+The idea is that as we go on through the RAA chain of support we add the preconditions of each rule every two rules. Consider another example of an indirect OLON with preconditions:
+\begin{align*}
+ P=\{&a  \leftarrow \sim b\\
+ &b  \leftarrow \sim c,x\\
+ &c  \leftarrow \sim a\\
+ &x  \leftarrow \sim x,a\}
+\end{align*}
+
+The rules to add are:
+\begin{align*}
+ a & \leftarrow \sim c\\
+ b & \leftarrow \sim a\\
+ c & \leftarrow \sim b,x\\
+ x & \leftarrow a
+\end{align*}
+
+We don't add $x$ to the rule for $b$ because it eventually derives in $\sim b$, another path to the same RAA chain.
+\end{example}
+
+
+\begin{example}[ICONs]
+Considering now ICONs, we know that the reasoning is somewhat different, as the rules we add are not dependent on the head of the ICON but on the mutually exclusive tails. Given:
+\begin{align*}
+P=\{
+ \alpha &\leftarrow \lambda_{1}, PC_{\lambda_{1}}		&			 \alpha & \leftarrow \mu_{1}, PC_{\mu_{1}} \\
+ \lambda_{1} &\leftarrow \ldots												&			 \mu_{1} & \leftarrow \ldots \\
+ \ldots &\leftarrow \lambda_{n}, PC_{\lambda_{n}}		&			 \ldots & \leftarrow \mu_{n}, PC_{\mu_{n}} \\
+ \lambda_{n}& \leftarrow \beta, PC_{\lambda_{n+1}}		&			 \mu_{n} & \leftarrow \sim \beta, PC_{\mu_{n+1}} 
+\}
+\end{align*}
+
+If we have identified an ICON over $\alpha$, the rules to add are simply:
+\begin{align*}
+ \lambda_{n}& \leftarrow PC_{\lambda_{n+1}}, PC_{\mu_{n+1}}\\
+ \mu_{n} & \leftarrow PC_{\mu_{n+1}}, PC_{\lambda_{n+1}}
+\end{align*}
+
+which will render $\alpha$ true because the contradictions it had are now solved. In fact, these rules are just modified versions of the last rules in the ICON, the ones with contradictory tails. Note that we demand that both tails are true in any ICON, because the ICON is only in effect if both tails are in effect\footnote{Result from \cite{ampMSc} and definition \ref{def:icon} on page \pageref{def:icon}.}. In the case of ICONs, we say that the tail of an ICON is formed by the two rules which have contradictory bodies in the ICON.
+\end{example}
+
+Let's now define the function $Tail^{OLON}(X)$ which will give the Tail of an OLON:
+
+\begin{definition}[Tail function for OLONs]
+Let $P$ be a NLP and $X$ be the head of an OLON (direct or indirect) of $P$.
+
+We define the function $Tail^{OLON}(X)$ the following way:
+
+\begin{align*}
+Tail^{OLON}(X)=\{h: & h=head(r) \wedge\\
+						 & \sim X\in body(r)\}
+\end{align*}
+\end{definition}
+
+Now we define the function $Tail^{ICON}(X)$ which will give the Tail of an ICON:
+
+\begin{definition}[Tail function for ICONs]
+Let $P$ be a NLP and $Y$ the head of an ICON of $P$.
+
+We define $Tail^{ICON}(Y)$ as:
+\begin{align*}
+Tail^{ICON}(Y)=\{\lambda_{n}, \mu_{n} : & \lambda_{n}=head(r_{1}) \wedge\\
+																				 & \mu_{n}=head(r_{2}) \wedge\\
+						 														 & r_{1}\text{ and }r_{2}\text{ have contradictory tails.}\}
+\end{align*}
+We refer to the first tail of an ICON as $Tail^{ICON}_{\lambda}(Y)$ and the second tail of an ICON as $Tail^{ICON}_{\mu}(Y)$.
+\end{definition}
+
+Given these three RAA patterns, $OLONS^{d}$, $OLONS^{i}$ and $ICONS$, we can now define a theoretical operator which adds the substitution rules to the original program, for each RAA pattern found:
+
+
+\begin{definition}[Substitution Operator $\Sigma$]
+\label{def:sigma}
+Given a NLP $P$ and the sets of RAA patterns $OLONS^{d}$, $OLONS^{i}$ and $ICONS$, the $\Sigma(P)$ operator adds the following substitution rules to $P$:
+
+For each $OLON^{d}\left(a\right)$ add the following rule:
+\begin{align*}
+a\leftarrow \sim Tail^{OLON}(a), PCs_{a}
+\end{align*}
+
+For each head of $OLON^{i}\left(\{a_{1},a_{2},\ldots,a_{n} \}\right)$ add the following rule:
+\begin{align*}
+a_{i}\leftarrow \sim Tail^{OLON}(a_{i}), PC_{a_{i}}
+\end{align*}
+
+For each $ICON_{P}(\alpha)$ add the following rules a copy of the rules with contradictory tails, where the contradictory literals are removed and the preconditions of both rules are present in both bodies of both rules:
+\begin{align*}
+Tail^{ICON}_{\lambda}(\alpha)\leftarrow PC_{\lambda_{n+1}},PC_{\mu_{n+1}}\\
+Tail^{ICON}_{\mu}(\alpha)\leftarrow PC_{\mu_{n+1}},PC_{\lambda_{n+1}}
+\end{align*}
+
+where $Tail^{ICON}_{\lambda}$ and $Tail^{ICON}_{\mu}$ are the tails of the ICON of $\alpha$.
+
+We call $P^{r}$ the transformed program by the $\Sigma$ operator and define $\Sigma(P)=P^{r}$.
+
+\end{definition}
+
+We called this a theoretical operator because there is still the problem associated with finding the RAA patterns. The idea with this operator is to define a framework form which we'll define a program transformation to find RAA patterns. 
+
+We now present a new definition for the \rsms, based on this operator:
+
+\begin{definition}[Alternative definition of the \RSMs and Semantics]
+Given a NLP $P$, $M$ is a \rsm of $P$ iff $M$ is a stable model of $\Sigma(P)$, i.e., $\Gamma_{\Sigma(P)}(M)=M$.
+\end{definition}
+
+\begin{theorem}[Soundness and completeness regarding the \rsms semantics]
+\label{th:ruleRSM}
+According to the rule extension property, programs with RAA patterns have all their patterns extended with a rule that provides them with classical support. Then, on this revised version of the original program, we calculate the stable models.
+
+The \sms of $P^{r}$ are the \rsms of $P$.
+
+\begin{proof}
+
+We start with recalling the definition of the \rsms, which states that $M$ is a rSM of a \nlp $P$ if
+
+\begin{itemize}
+\item $M$ is a minimal classical model, with ``$\sim$'' interpreted as classical negation;
+\item $\exists_{\alpha\ge 2}:\Gamma_{P}^{\alpha}(M)\supseteq RAA_{P}(M)$;
+\item $RAA_{P}(M)$ is sustainable.
+\end{itemize}
+
+with $RAA_{P}(M) = M\setminus \Gamma_{P}(M)$.
+
+From this definition results that $M = \Gamma_{P}(M) \cup RAA_{P}(M)$ is a \rsm if:
+
+\begin{itemize}
+\item $M$ is a minimal classical model, with ``$\sim$'' interpreted as classical negation;
+\item $\exists_{\alpha\ge 2}:\Gamma_{P}^{\alpha}(M)\supseteq RAA_{P}(M)$;
+\item $RAA_{P}(M)$ is sustainable.
+\end{itemize}
+
+If these three conditions hold then $M$ is a \rsm.
+
+If $M$ is a \rsm, then it enjoys the property of cumulativity, from which results that:
+
+\begin{align*}
+M & = \Gamma_{P}(M) \cup RAA_{P}(M) =\\
+  & = \Gamma_{P\cup RAA_{P}(M)}(M)
+\end{align*}
+
+This result allows us to present an alternative view of the definition of the \rsms:
+
+Let $RAA_{P}(M)$ be the set of atoms in $M$ which don't have classical support in $P$, i.e., $RAA_{P}(M) = M\setminus \Gamma_{P}(M)$.
+
+$RAA_{P}(M)$ is a set which contains literals present in RAA patterns and literals which depend on those but lack classical support because of their dependency on RAA patterns. Then, we can say that the set $RAA_{P}(M)$ is made up of the subsets $RAA^{class}_{P}(M)$ (literals lacking classical support but not present in RAA patterns) and $RAA^{raa}_{P}(M)$ (literals which lack classical support but are present in RAA patterns):
+
+\begin{align*}
+RAA_{P}(M) = RAA^{class}_{P}(M)\cup RAA^{raa}_{P}(M)
+\end{align*}
+
+The atoms in $RAA^{class}_{P}(M)$ will be true in the \rsm because of their dependency on atoms in $RAA^{raa}_{P}(M)$, which allows us to say that, in fact, only the set $RAA^{raa}_{P}(M)$ needs to be added to $P$ in order for the rSM to be calculated.
+
+$M = \Gamma_{P\cup RAA^{raa}_{P}(M)}(M)$ is a \rsm of $P$ iff:
+
+\begin{itemize}
+\item $M$ is a minimal classical model, with ``$\sim$'' interpreted as classical negation;
+\item $\exists_{\alpha\ge 2}:\Gamma_{P}^{\alpha}(M)\supseteq RAA_{P}(M)$;
+\item $RAA_{P}(M)$ is sustainable.
+\end{itemize}
+
+Knowing this, we'll now prove that, for a NLP $P$, and a \rsm $M^{r}$ of $P$, 
+
+\begin{align*}
+rSM_{P}(M^{r})\Leftrightarrow SM_{\Sigma(P)}(M)
+\end{align*}
+
+Consider $rSM_{P}(M^{r})$. Then, $M^{r} = \Gamma_{P\cup RAA^{raa}_{P}(M^{r})}(M^{r})$. 
+
+On the other hand, we have that $M=\Gamma_{\Sigma(P)}(M)$. $\Sigma(P)$ is a program transformation that adds to $P$ a set of rules which may conclude heads of RAA patterns. Let's call this set of rules $R_{p}$. We then have
+
+\begin{align*}
+\Gamma_{\Sigma(P)}(M) = \Gamma_{P\cup R_{P}}(M)
+\end{align*}
+
+At this point, proving that $rSM_{P}(M^{r})\Leftrightarrow SM_{\Sigma(P)}(M)$ is equivalent to proving that $(P\cup RAA^{raa}_{P}(M^{r}))\Leftrightarrow (P\cup R_{P})$.
+
+$R_{P}$ is a set of rules which allows us to conclude atoms present in RAA patterns. These rules have the forms:
+
+\begin{align*}
+& a\leftarrow \sim Tail^{OLON}(a), PCs_{a}\text{, for direct OLONs}\\
+& a_{i}\leftarrow \sim Tail^{OLON}(a_{i}), PC_{a_{i}}\text{, for indirect OLONs and}\\
+& Tail^{ICON}_{\lambda}(\alpha)\leftarrow PC_{\lambda_{n+1}},PC_{\mu_{n+1}}\text{ and}\\
+& Tail^{ICON}_{\mu}(\alpha)\leftarrow PC_{\mu_{n+1}},PC_{\lambda_{n+1}}\text{ for ICONs}
+\end{align*}
+
+The set of heads of rules of $R_{P}$ is a superset of $RAA^{raa}_{P}(M^{r})$ which, in turn, does not include any literal that is part of a RAA pattern but which won't be part on a \rsm. The reason for these literals not being true in the rSM has to do with these RAA patterns not being active. In particular, an RAA pattern is not active if its preconditions don't hold. They fail to be in the $RAA^{raa}_{P}(M^{r})$ set because if their preconditions don't hold and they are part of $RAA^{raa}_{P}(M^{r})$, then $RAA^{raa}_{P}(M^{r})$ won't be sustainable. Consider as an example:
+
+\begin{align*}
+P=\{
+&a\leftarrow\sim b,\sim a\\
+&b\leftarrow\sim b\}
+\end{align*}
+
+and consider that $M^{r}=\{a,b\}$. then, $RAA_{P}(M^{r})=\{a,b\}$. However, $\{a,b\}$ is not sustainable as, according to the definition of sustainability\footnote{Definition \ref{def:sustainable} on page \pageref{def:sustainable}.}, $a\notin \Gamma_{P\cup RAA_{P}(M^{r})\setminus\{a\}}\left(WFM\left(P\cup RAA_{P}(M^{r})\setminus\{a\}\right)\right)$, because the OLON of $a$ demands $\sim b$ as a precondition.
+
+So, while $RAA^{raa}_{P}(M^{r})$ only has atoms whose preconditions were satisfied, $R_{P}$ has rules for all atoms but these rules include the demand that the preconditions be satisfied. If they are not, these atoms will never be concludable. This is because of the definition of sustainability, which we rewrite here in a somewhat simpler form.
+
+A set $S$ is sustainable iff:
+
+\begin{align*}
+\forall_{\alpha\in S}, \alpha\in \Gamma_{P}(WFM_{P'}) \wedge P'=P\cup S\setminus\{\alpha\}
+\end{align*}
+
+From this definition follows that, if $\alpha\in S$ and $PC(\alpha)$ doesn't hold, then $S$ is not sustainable. If $PC(\alpha)$ doesn't hold, $\alpha$ won't be true. In a program where the fact $\alpha$ is not added, $\alpha\notin \Gamma_{P}(WFM_{P'})$.
+
+Additionally, it also holds that if $S$ is not sustainable, then $\exists_{\alpha\in S}:PC(\alpha)\text{ doesn't hold}$. If $S$ is not sustainable, then $\exists_{\alpha\in S}:\alpha\notin \Gamma_{P}(WFM_{P'})$. In order for $\alpha\notin \Gamma_{P}(WFM_{P'})$, i.e., not being present in a \sm, then either all rules with head $\alpha$ were cut from $P'$ or there exist rules with head $\alpha$ such that their bodies don't hold. In either case, their preconditions don't hold.
+
+Given this result, we conclude that 
+
+\begin{align*}
+P\cup RAA^{raa}_{P}(M^{r})\Leftrightarrow P\cup R_{P}
+\end{align*}
+
+and therefore, the \sms of $P\cup RAA^{raa}_{P}(M^{r})$ are the same as the \sms of $P\cup R_{P}$. In particular, given $M^{r}$ a \rsm of $P$, if $M^{r} = \Gamma_{P\cup RAA^{raa}_{P}(M^{r})}(M^{r})$ then $M^{r} = \Gamma_{P\cup R_{P}}(M^{r})$.
+
+This result allows us to conclude the other side of the implication, that if $M$ is a stable model of $P\cup R_{P}$, then $M$ is a \rsm of $P$ because, in particular, $M$ is also a stable model of $P\cup RAA^{raa}_{P}$, and therefore is a \rsm.
+
+\end{proof}
+
+%We start by considering the case where $P$ has no RAA patterns. In this case, the condition is trivially true because the \rsms semantics is equivalent to the \sms semantics for programs without RAA patterns, as it was proven by Pinto in \cite{ampMSc}.
+%
+%That not being the case, for each RAA pattern we have, $P^{r}$ has an additional rule which allows this pattern's head or heads to become part of the model under certain conditions. Recal the \rsms definition's conditions:
+%
+%Let $RAA_{P}(M)\equiv M-\Gamma_{P}(M)$. $M$ is a Revised Stable Model of an Normal \LP $P$, if and
+%only if:
+%\begin{itemize}
+%\item $M$ is a minimal classical model, with ``$\sim$'' interpreted as classical
+%negation;
+%\item $\exists_{\alpha\ge 2}$ such that $\Gamma_{P}^{\alpha}(M)\supseteq
+%RAA_{P}(M)$
+%\item $RAA_{P}(M)$ is sustainable.
+%\end{itemize}
+%
+%As we are calculating the \sms of $P$ and the \sms are minimal models, the first condition is trivially true.
+%
+%The second condition states that the RAA set must have generalized support. With the program transformation we defined previously, the RAA set will correspond to the set of RAA patterns we have identified, and generated an extension rule for it. Now that we have another rule for each of these patterns, we have another way of giving them support, this time not by an RAA chain of support. Let's then take a closer look at each of these rules. Because each pattern has the imposition of its preconditions being true \emph{and} the tail of the pattern being false, all those which don't have generalized support won't have their rules satisfied. Therefore, condition 2 is also satisfied.
+%
+%Finally, condition 3 states that the RAA set must be sustainable. As we stated before, the RAA set will only be composed of the heads of those rules which will have generalized support. Additionally, we know that each of those atoms will have to belong to \tuWFM and, therefore, it will never ``go against'' any other atom in the RAA set. Therefore the RAA set is sustainable.
+%
+%As these three conditions are satisfied the \sms of $P^{r}$ are \rsms of $P$.
+%
+%Let's now prove that no stable model of $P^{r}$ is not a \rsm of $P$.
+%
+%For this, let's reason by absurdity and consider that there is a \sm of $P^{r}$ which was not a \rsm of $P$. We start by considering that the program had no RAA patterns. This being the case, we have that $P^{r}=P$, which by the definition of the \rsms makes $rSM_{P} = SM_{P}$. Therefore the hypothesis can't be true.
+%
+%Let's now consider programs with RAA patterns. This being the case, this \sm would have to have failed in at least one of the previous conditions. 
+%
+%If this model was a \sm, then it couldn't have failed in the first condition as \sms are minimal models. 
+%
+%In order for the second or third conditions to be false, there had to be an RAA pattern which was not true by \raa but was true in the model because of the extension rules. In this case, either one of its preconditions was false or the tail of the OLON was true. But in any of those cases, the rules added would have prevented the literal from being true in the first place. Therefore, no RAA pattern which was not part of the \rsm could have been true by the extension rules.
+%
+%So, by absurdity, no \sm of $P^{r}$ is not a \rsm of $P$.
+%\end{proof}
+\end{theorem}
+
+
+Now that RAA patterns are natural \sms of transformed programs, we also define the \rwfs based on this program transformation. Our approach is the same used in \cite{wfsDualities} which defines the \WFS as being the least fixed point of \BSo \gSq. We now apply the same ideas for calculating the rWFS:
+
+\begin{definition}[Alternative definition of the \RWFM and Semantics]
+Given a NLP $P$, the \rwfm of $P$ is the tuple $\left\langle \cal{T},\cal{TU} \right\rangle$, with $\cal{T}$ (true literals) being the first fixed point of operator $\Gamma_{\Sigma(P)}^{2}$ starting from the empty interpretation, and $\cal{TU}$ (true or undefined literals) being the next iteration of $\Gamma_{\Sigma(P)}$ from the first fixed point of $\Gamma_{\Sigma(P)}^{r^{2}}$, i.e., $\Gamma_{\Sigma(P)}(\cal{T})$.
+\end{definition}
+
+\begin{theorem}[Soundness and completeness regarding the \rwfs]
+\label{th:ruleRWFS}
+Given a \nlp $P$, it holds that its rWFM can be calculated by the \gSq operator applied on $\Sigma(P)$:
+
+\begin{align*}
+rWFM_{P} = \langle\Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\}),\Gamma_{\Sigma(P)}(\Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\}))\rangle
+\end{align*}
+
+
+%According to the rWFS definition, the rWFM of a program $P$ is the WFM of an extended program with the heads of the acceptable RAA patterns of $P$. A pattern is acceptable if it respects the following conditions:
+%\begin{itemize}
+%	\item It is an $ICON$ or an $OLON^{d}$;
+%	\item Its preconditions are acceptable;
+%	\item It belongs to the set \tuWFM.
+%\end{itemize}
+%
+%A precondition is acceptable if it is part of \tWFM$\cup RAA_{P}$ and is in conformity with other preconditions.
+%
+%It holds that the rWFM of $P$ is the WFM of $P^{r}$, this being the program transformed with the extension rules.
+
+\begin{proof}
+We know, by definition \ref{def:rwfs} on page \pageref{def:rwfs}, that the rWFM of any NLP $P$ is given by the WFM of $P$ extended with all $OLONS^{d}$ and $ICONS$ with acceptable preconditions.
+
+Let's start by considering that $P$ has no RAA patterns whatsoever. In that case:
+
+\begin{align*}
+rWFM_{P}(M^{r}) = WFM_{P}(M)
+\end{align*}
+
+and 
+
+\begin{align*}
+WFM_{P}(M) = \langle\Gamma_{P}^{2\text{ }\uparrow \omega}(\{\}),\Gamma_{P}(\Gamma_{P}^{2\text{ }\uparrow \omega}(\{\}))\rangle
+\end{align*}
+
+However, if no RAA patterns exist, $P=\Sigma(P)$ which allows us to conclude that:
+
+\begin{align*}
+rWFM_{P}(M^{r}) = \langle\Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\}),\Gamma_{\Sigma(P)}(\Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\}))\rangle
+\end{align*}
+
+Let's now consider that $P$ has RAA patterns. As the rWFM is the WFM of an extended program $P\cup \left(accRAA_{P}\cap {\cal{TU}}_{WFM}\right)$ we have:
+
+\begin{align*}
+rWFM_{P}(M^{r}) = \langle\Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\}),\Gamma_{\Sigma(P)}(\Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\}))\rangle
+\end{align*}
+
+which is equivalent to saying that
+
+\begin{align}
+\label{eqn:rWFSequiv}
+\langle\Gamma_{accRAA_{P}\cap {\cal{TU}}_{WFM}}^{2\text{ }\uparrow \omega}(\{\}),\Gamma_{accRAA_{P}\cap {\cal{TU}}_{WFM}}(\Gamma_{accRAA_{P}\cap {\cal{TU}}_{WFM}}^{2\text{ }\uparrow \omega}(\{\}))\rangle = \langle\Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\}),\Gamma_{\Sigma(P)}(\Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\}))\rangle
+\end{align}
+
+Which, in turn, is true if
+
+\begin{align*}
+\Gamma_{accRAA_{P}\cap {\cal{TU}}_{WFM}}^{2\text{ }\uparrow \omega}(\{\}) = \Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\})
+\end{align*}
+
+and 
+
+\begin{align*}
+\Gamma_{accRAA_{P}\cap {\cal{TU}}_{WFM}}(\Gamma_{accRAA_{P}\cap {\cal{TU}}_{WFM}}^{2\text{ }\uparrow \omega}(\{\})) = \Gamma_{\Sigma(P)}(\Gamma_{\Sigma(P)}^{2\text{ }\uparrow \omega}(\{\}))
+\end{align*}
+
+From $\Sigma(P)$ we know that it is a program transformation that adds to $P$ a set of rules which may conclude heads of RAA patterns. Let's call this set of rules $R_{p}$. We then have
+
+\begin{align*}
+\Sigma(P) = P\cup R_{P}
+\end{align*}
+
+On the other hand, we have that $accRAA_{P}\cap {\cal{TU}}_{WFM}$ is a subset of $R_{P}$, since it includes all the $OLONS^{d}$ and $ICONS$ which have valid preconditions.
+
+Then, expression \ref{eqn:rWFSequiv} will be true if, in particular, only those rules with heads in the set $accRAA_{P}\cap {\cal{TU}}_{WFM}$ will succeed.
+
+$R_{P}$ is a set of rules which allows us to conclude atoms present in RAA patterns. These rules have the forms:
+\begin{align*}
+& a\leftarrow \sim Tail^{OLON}(a), PCs_{a}\text{, for direct OLONs}\\
+& a_{i}\leftarrow \sim Tail^{OLON}(a_{i}), PC_{a_{i}}\text{, for indirect OLONs and}\\
+& Tail^{ICON}_{\lambda}(\alpha)\leftarrow PC_{\lambda_{n+1}},PC_{\mu_{n+1}}\text{ and}\\
+& Tail^{ICON}_{\mu}(\alpha)\leftarrow PC_{\mu_{n+1}},PC_{\lambda_{n+1}}\text{ for ICONs}
+\end{align*}
+
+For any generic rule $\alpha\leftarrow body$ in a \nlp $P$, $\alpha$ will be part of the fixed point of \gSq starting from the empty interpretation if it belongs to the \wfm of $P$.
+
+In particular for $OLONS^{i}$, as they have a structure like
+\begin{align*}
+a\leftarrow\sim b\\
+b\leftarrow\sim c\\
+c\leftarrow\ldots\\
+\ldots\leftarrow\sim a
+\end{align*}
+
+each iteration of \gSq will cut all the rules in the indirect OLON\footnote{This behavior is similar to that of \gSq on ELONs.}:
+
+\begin{align*}
+\Gamma_{P}^{2}(\{\}) = \Gamma_{P}(\Gamma_{P}(\{\})) = \Gamma_{P}(\{a,b,c,\ldots\}) = \{\}
+\end{align*}
+
+We are then left with direct OLONs and ICONs. In the rWFS definition, the set of direct OLONs and ICONs is pruned to include only those patterns whose preconditions are not conflicting and which intersect with the ${\cal{TU}}_{WFM}$ set. However, the rules we added impose that the preconditions of each pattern are true, in order for it to become true:
+
+\begin{align*}
+& a\leftarrow \sim Tail^{OLON}(a), PCs_{a}\\
+& Tail^{ICON}_{\lambda}(\alpha)\leftarrow PC_{\lambda_{n+1}},PC_{\mu_{n+1}}\\
+& Tail^{ICON}_{\mu}(\alpha)\leftarrow PC_{\mu_{n+1}},PC_{\lambda_{n+1}}
+\end{align*}
+
+It's easy to see, for starters, that any $\alpha\notin{\cal{TU}}_{WFM}$ will never be concludable. If $\alpha\notin{\cal{TU}}_{WFM}$ and was on a RAA pattern, then one of its preconditions was false in $WFM_{P}$. In that case none of
+
+\begin{align*}
+& a\leftarrow \sim Tail^{OLON}(a), PCs_{a}\\
+& Tail^{ICON}_{\lambda}(\alpha)\leftarrow PC_{\lambda_{n+1}},PC_{\mu_{n+1}}\\
+& Tail^{ICON}_{\mu}(\alpha)\leftarrow PC_{\mu_{n+1}},PC_{\lambda_{n+1}}
+\end{align*}
+
+will be true.
+
+Additionally, if any of the preconditions in PC(x) are not in conformity with another RAA pattern, then this means that:
+
+\begin{itemize}
+	\item Either $PC(x)$ imposes some $\alpha$ and $\alpha$ is false;
+	\item Or $PC(x)$ imposes some $\sim\alpha$ and $\alpha$ is a true RAA pattern.
+\end{itemize}
+
+In either case, $PC(x)$ will be false, thus rendering $\alpha$ false.
+
+This proves that from $R_{P}$, only the rules with the heads in $accRAA_{P}\cap {\cal{TU}}_{WFM}$ will succeed as the least fixed points of \gSq which, in turn, proves that that the \rwfm can be calculated as the \wfm of $\Sigma(P)$. 
+
+The converse implication is established in an analogous way.
+
+\end{proof}
+%Let's start by considering that $P$ has no RAA patterns. That being the case, $P^{r}=P$ and, by theorem \ref{th:wfsExtension}, $WFM_{P} = rWFM_{P}$.
+%
+%That not being the case, $P^{r}$ has a set of rules for all RAA patterns. 
+%
+%As indirect OLONs have tails which are part of the OLON's chain of support, they will all deny each other and will never have support in the extension rules. 
+%
+%We are left with direct OLONs and ICONs. These now have rules which demand that each patterns's preconditions be satisfied, which satisfies the imposition that the preconditions be acceptable. Additionally, if its preconditions are not acceptable, this pattern will never belong to \tuWFM and will never be part of the rWFM.
+%
+%therefore, the $WFM_{P^{r}}=rWFM_{P}$.
+%
+%Let's now prove that the $WFM_ {P}$ won't give as true literals which are not part of the \rwfm of $P$.
+%
+%If $P$ has no RAA patterns, $P^{r}=P$ and therefore the hypothesis is trivially true.
+%
+%Otherwise, we are trying to prove that the rules we added allowed us to conclude some atoms which are part of indirect OLONs or were part of direct OLONs or ICONS with unnacceptable preconditions. In the first case, this would only be possible if there was an indirect OLON which only provided a single model, and if this was the case it would have classical support and hence it would already be true in the rWFS.
+%
+%We're only left with the other case, where an $OLON^{d}$ or ICON was true without belonging to the rWFM. This could only happen if although having conflicting preconditions, these were satisfied in $P^{r}$. If the preconditions were conflicting, then either $PC = X$ and $X\notin accPCs$ or $PC = \sim X$ and $X\in accPCs$. However, in either case the rule would never be true. Consider the first case: if $X$ is not satisfied then it can't allow the rule to be true. In the second case, if $X$ is already part of the WFM, then rules with $\sim X$ as precondition will never be true.
+%
+%Therefore, the \wfm of $P^{r}$ will never be different from the \rwfm of $P$.
+%\end{proof}
+
+\end{theorem}
+The definition of this theoretical operator skipped over an important step, that of actually discovring RAA patterns in a program, in order to introduce an important property: that if we add a rule to a progran with RAA patterns which has the RAA reasoning implicit in it, then all the SMs of this extended program are the rSMs of the original program.
+
+We skipped that important step in order to deal with it now in a syntactic manner. In he next section we'll introduce the notion of \cfps to allow to overcome the problem of identifying RAA patterns and generate syntactic transformations that are equivalent to the previous ones.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Transformational Semantics and Additional Properties}
+
+As we've seen in the previous section, although the property of rule extension allows for a complete transformational definition of the \rsms and the \rwfs, there is still the problem of finding out whether or not a certain set of rules corresponds to an OLON or ICON. In this section we'll overcome this problem by introducing a solution based on \cfps. We start by presenting the motivation and general working of \cfps and then expose the transformation for each pattern we identified previously. We then redefine the \rsms and the \rwfs based on this transformation.
+
+
+
+\subsection{\CFPs}
+Our approach when defining a \fpo for the rSMs and the rWFS is to express the principle of RAA in terms of a syntactic operation. This syntactic operation must provide a way for a certain literal $X$ to be concludable if the assumption $\sim X$ was made, thus allowing us to overcome the problem of finding whether or not a certain literal can be proven by \raa. We'll accomplish this by means of \cfps. 
+
+Counterfactual programs (CFPs) are copies of a NLP $P$, where we assume some default literal $\sim X$ true, i.e., we remove this default assumption from all rules of the \cfp. Roughly speaking, if $X$ is now concludable then $X$ was provable by RAA. These programs are going to be used modularly, i.e., different CFPs are used to find different RAA patterns and they will provide a layer of reasoning which only allows the corresponding $X$ to be concludable. This is, in fact, the idea behind the principle of \raa.
+
+\begin{example}[A simple \cfp]
+Consider any \nlp $P$ with any RAA pattern, for example:
+\begin{align*}
+P=\{ & \lambda_{0}  \leftarrow \lambda_{1}\\
+ 		 & \lambda_{1}  \leftarrow \lambda_{2}\\
+ 		 & \lambda_{2}  \leftarrow \ldots\\
+		 & \ldots 			\leftarrow \lambda_{n}\\
+ 		 & \lambda_{n} 	\leftarrow \sim \lambda_{0}\}
+\end{align*}
+
+Its \cf version is the following program, from which we removed the \cf hypothesis:
+\begin{align*}
+Pcf(\lambda_{0})	=\{ & \lambda_{0}  \leftarrow \lambda_{1}\\
+ 		 									& \lambda_{1}  \leftarrow \lambda_{2}\\
+ 		 									& \lambda_{2}  \leftarrow \ldots\\
+		 									& \ldots 			\leftarrow \lambda_{n}\\
+ 		 									& \lambda_{n} 	\leftarrow\}
+\end{align*}
+
+Given this transformation, $\lambda_{0}$ now has classical support. In the following subsections we'll introduce the complete transformation for each RAA pattern we have studied so far.
+\end{example}
+
+Following the same reasoning behind the property of rule extension of the rSMs, we are going to define a \emph{revised} version of the \go (\gro) which performs this program transformation before we calculate the stable models. 
+
+\subsubsection{Transforming Direct OLONs}
+Following the idea behind \cfps, given a certain program $P_ {1}$, let's calculate its \cfp:
+
+\begin{align*} 
+P=\{& a \leftarrow x\\
+		& x \leftarrow y, \sim x\\
+		& y \leftarrow \sim a\\
+		& b \leftarrow c, \sim b\\
+		& c \leftarrow \sim c\}
+\end{align*} 
+
+Let's start by analyzing this example. The first three rules are the program presented in example \ref{ex:sergio1} in page \pageref{ex:sergio1}. In this example we have a direct OLON over $a$ with one of the literals in its chain of support also being an OLON ($x$). It's easy to see that the precondition for $x$ is not valid and therefore, $a$ is the only acceptable RAA pattern in the first three rules. As it intersects with \tuWFM it is added to the original program. The last two rules are a direct OLON with head $b$ which has a precondition of $c$, and another direct OLON with head $c$. Both $b$ and $c$ will be true in the rWFM, as well as $a$, i.e., $rWFM_{P}(M^{r})=\langle\{a,b,c\},\{a,b,c\}\rangle$. Additionally, $P$ also has only one \rsm: $rSM_{P}(M^{r})=\{a,b,c\}$.
+
+What the RAA principle states is that if we assume $\sim a$ and this leads us to $a$, then $a$ must be true. However, in this case, we have several literals which have the potential to be provable by RAA, i.e., they appear at least once in the head of a rule and at least once negated in the tail of a rule. Therefore, we'll create \cfps for all of them. As we don't want the literals in our \cfp to interfere with the literals in the original program, we are going to change them into an extended version -- every literal $X$ will now have a ``d'' in its superscript to indicate they are part of a \emph{direct} OLON \cfp, as well as a natural number in its subscript to indicate which literal is this \cfp referring to. Note that we create \cfps for each literal which we suspect that can be provable by \raa.
+
+
+\begin{align*} 
+Pcf(a^{d})=\{& a_{1}^{d} \leftarrow x_{1}^{d}						&		Pcf(x^{d})=\{& a_{2}^{d} \leftarrow x_{2}^{d}\\
+						 & x_{1}^{d} \leftarrow y_{1}^{d}, \sim x		&			 				 	 & x_{2}^{d} \leftarrow y_{2}^{d}\\
+				 		 & y_{1}^{d} \leftarrow											&								 & y_{2}^{d} \leftarrow \sim a\\
+						 & b_{1}^{d} \leftarrow c_{1}^{d}, \sim b		&							   & b_{2}^{d} \leftarrow c_{2}^{d}, \sim b\\
+						 & c_{1}^{d} \leftarrow \sim c\}						&								 & c_{2}^{d} \leftarrow \sim c\}\\
+\end{align*}
+\begin{align*} 
+Pcf(b^{d})=\{& a_{3}^{d} \leftarrow x_{3}^{d}						&		Pcf(c^{d})=\{& a_{4}^{d} \leftarrow x_{4}^{d}\\
+						 & x_{3}^{d} \leftarrow y_{3}^{d}, \sim x		&			 				 	 & x_{4}^{d} \leftarrow y_{4}^{d}, \sim x\\
+				 		 & y_{3}^{d} \leftarrow	\sim a							&								 & y_{4}^{d} \leftarrow \sim a\\
+						 & b_{3}^{d} \leftarrow c_{3}^{d}						&							   & b_{4}^{d} \leftarrow c_{4}^{d}, \sim b\\
+						 & c_{3}^{d} \leftarrow \sim c\}						&								 & c_{4}^{d} \leftarrow \}
+\end{align*} 
+
+
+It's easy to see now that, for example, $a_{1}^{d}$ can only be concluded given the precondition of $\sim x$ and the original assumption of $\sim a$, which is correct according to the \rsm of this program ($rSM_{P}(M^{r}) = \{a,b,c\}$). 
+
+Note, that we kept the default literals unchanged because for all that matters in finding direct OLONs, default negations are not part of the RAA chain of support\footnote{Recall definition \ref{def:dOLON} on page \pageref{def:dOLON}.} -- there is only one negation and that one is assumed true in the CFP. So the other negations are kept unchanged to allow the CFP to work as much as possible the same way as the original one -- the only difference is that we are not interested in concluding any of those extended literals. In fact, we're only interested in knowing if, for example, $a$ is part of a direct OLON. We can go one step further and say that, according to the property of RAA rule extension, $a$ is provable by RAA if it is in an OLON, if its preconditions are satisfied and if the tail of the OLON is false. The imposition of the preconditions being satisfied is implicit in the \cfp as it would be impossible for $a_{1}^{d}$ to be true if its preconditions wouldn't have been satisfied. So, the only things that have to happen for a certain literal in a direct OLON to be provable by RAA is to impose that the tail of the OLON must be false and the head of the \cfp must be true. Our new version of the extension rules presented in definition \ref{def:sigma} is the following set of rules:
+
+\begin{align*} 
+& aOLON \leftarrow a_{1}^{d}, \sim y\\
+& xOLON \leftarrow x_{2}^{d}\\
+& bOLON \leftarrow b_{3}^{d}\\
+& cOLON \leftarrow c_{4}^{d}
+\end{align*}
+
+where the head of each rule refers to a certain literal being in an OLON and the body of the rule corresponds to the reasoning in definition \ref{def:sigma}, i.e., something is in an OLON (and is provable by RAA) if it is concludable by a \cfp and if the tail of the OLON is false. Note that these are simplified versions of the extension rules from which we removed the preconditions and to which we added the head of each \cfp.
+
+However, one thing is still missing. This set of rules, as it is, will never allow us to conclude $b_{3}^{d}$ because the rule $c_{3}^{d} \leftarrow \sim c$ will be removed by \go (in turn, because $c$ is part of the interpretation). However, $c_{4}^{d}$ is directly concluded meaning that $c$ is provable by RAA. So, what is missing is a way of propagating the conclusions we already reached on other CFPs. We'll add these propagation rules rules to each literal in a CFP which also has a CFP of its own, except for the literal of the CFP we're adding rules to (otherwise we would generate rules such as $X_ {\iota}^{d}\leftarrow X_ {\iota}^{d}$):
+
+\begin{align*} 
+\text{Propagation rules for a}=\{& x_{1}^{d} \leftarrow x_{2}^{d}			&		\text{Propagation rules for x}=\{& a_{2}^{d} \leftarrow a_{1}^{d}\\
+						 & b_{1}^{d} \leftarrow b_{3}^{d}			&			 				 	 & b_{2}^{d} \leftarrow b_{3}^{d}\\
+				 		 & c_{1}^{d} \leftarrow c_{4}^{d}\}		&								 & c_{2}^{d} \leftarrow c_{4}^{d}\}\\
+\\
+\text{Propagation rules for b}=\{& a_{3}^{d} \leftarrow a_{1}^{d}			&		\text{Propagation rules for c}=\{& a_{4}^{d} \leftarrow a_{1}^{d}\\
+						 & x_{3}^{d} \leftarrow x_{2}^{d}			&			 				 	 & x_{4}^{d} \leftarrow x_{2}^{d}\\
+				 		 & c_{3}^{d} \leftarrow	c_{4}^{d}			&								 & b_{4}^{d} \leftarrow b_{3}^{d}\}\\
+\end{align*} 
+
+With the propagation of RAA results, we can now say what is true by \raa:
+
+\begin{align*} 
+& aRAA \leftarrow aOLON\\
+& xRAA \leftarrow xOLON\\
+& bRAA \leftarrow bOLON\\
+& cRAA \leftarrow cOLON\\
+& \\
+& a \leftarrow aRAA\\
+&x \leftarrow xRAA\\
+&b  \leftarrow bRAA\\
+&c \leftarrow cRAA
+\end{align*}
+
+Let's now formalize this transformation and its intuitions. We start with what we mean by the peotential for a literal to be part of an OLON:
+
+%########################################### DEFINITION
+\begin{definition}[Potential for RAA provability because of OLON belonging]
+Let $P$ be a \nlp with $l$ rules in the form $r_k=H\leftarrow A_{1},\ldots,A_{m},\sim B_{1},\ldots,\sim B_{n}$ ($m,n\geq 0\ and\ 1\leq k\leq l$) and $x$ an atom.
+
+We say that $x$ has the potential for being proven by \raa because of being part of an \olon iff:
+
+\begin{align*}
+\exists_{r_{1},r_{2} \in P}:& \sim X \in body(r_{1}) \wedge\\
+                            & X = head(r_{2})
+\end{align*}
+
+Where $r_{1}$ and $r_{2}$ may be the same rule.
+\end{definition}
+
+Let's now specify how a \cfp for direct OLONs should be created.
+
+%########################################### DEFINITION
+\begin{definition}[Direct \cfp Pcf]
+\label{def:directPCF}
+Let $P$ be a \nlp, $X$ an atom in $P$ which can be proven by \raa and $\iota$ (iota) an index identifying uniquelly $X$ in the set of literals of $P$ that can be proven by RAA.
+
+The \cfp for direct OLONs of $X$ is constructed from a copy $Pcf(X ^{d})$ of $P$ by performing the following operations on $Pcf(X ^{d})$:
+
+\begin{enumerate}
+	\item Remove from all rules of $Pcf(X ^{d})$ the default literal $\sim X$;
+	\item Replace all atoms $A$ in all rules with the auxiliary atom $A_{\iota}^{d}$;
+\end{enumerate}
+
+We call $X_{\iota}^{d}$ the head of this \cfp.
+The heads of the rules from which $\sim X$ was removed form the set $Tails_{P}(X)$.
+\end{definition}
+
+As we are interested in generating \cfps for the entire program and for all literals in the program whih have potential for being part of a direct OLON, we define the set of direct \cfps.
+
+%########################################### DEFINITION
+\begin{definition}[Direct \cfps Set]
+Let $P$ be a \nlp, $S$ the set of literals in $P$ which have the potential to be proven by \raa and an ordering which associates each literal in $S$ with a number $\iota\geq 0$.
+
+The set of all direct \cfps of $P$ regarding all literals in $S$ is the set
+
+\begin{center}
+\begin{math}
+{\beta}cf_{P}^{d} = \displaystyle\left( {\bigcup\limits_\iota  {Pcf(X_{\iota}^{d})} } \right)  
+\end{math}
+\end{center}
+
+with $\iota$ being the program's \cf index, incremented as each new literal is considered.
+\end{definition}
+
+We now define the propagation rules which are added to each \cfp.
+
+
+%########################################### DEFINITION
+\begin{definition}[Propagation rules transformation for ${\beta}cf_{P}^{d}$]
+Let ${\beta}cf_{P}^{d}$ be the set of all direct \cfps of the NLP $P$.
+
+The propagation rules transformation for each \cfp in ${\beta}cf_{P}^{d}$ consists of the following operation:
+
+\begin{itemize}
+	\item For each extended literal $x_{\iota}^{d}$ such that there exists a \cfp $Pcf(x^{d})$ with head $x_ {\kappa}^{d}$ add the rule $x_{\iota}^{d}\leftarrow x_ {\kappa}^{d}$ to the \cfp being considered.
+\end{itemize}
+\end{definition}
+
+Finally, the rule extension transformation ,which corresponds to the generation of an equivalent rule to those of the Rule Extension property of the \rsms.
+
+%########################################### DEFINITION
+\begin{definition}[Rule extension transformation for ${\beta}cf_{P}^{d}$]
+\label{def:directOLONtrans}
+Let ${\beta}cf_{P}^{d}$ be the set of all direct \cfps of the NLP $P$.
+
+The rule extension transformation for each \cf head $X_{\iota}^{d}$ in ${\beta}cf_{P}^{d}$ consists of generating the following rule:
+
+\begin{align*}
+XOLON \leftarrow X_{\iota}^{d}, \sim Tails_{P}(X)
+\end{align*}
+
+where $\sim Tails(X)$ corresponds to $\sim t_{1}, \sim t_{2}, \ldots, \sim t_{n}$ if $Tails(X)={t_{1}, t_{2}, \ldots, t_{n}}$.
+
+Additionally, for each $XOLON$ generated, the following rules are also to be created:
+
+\begin{align*}
+& XRAA \leftarrow XOLON\\
+& X \leftarrow XRAA
+\end{align*}
+\end{definition}
+
+
+With these definitions we have a way of generating a program transformation capable of identifying direct OLONs:
+
+%########################################### DEFINITION
+
+\begin{definition}[Direct OLONs transformation via \cfps]
+Let $P$ be a \nlp. 
+
+The Direct OLONs transformation via \cfps of $P$ is the revised program $P^{d}$ which can be generated by the following operations:
+
+\begin{enumerate}
+\item Create the \cfp set ${\beta}cf_{P}^{d}$;
+\item Apply the propagation rules transformation and Rule extension transformation on ${\beta}cf_{P}^{d}$;
+\item Let $P^{d}={\beta}cf_{P}^{d}$.
+\end{enumerate}
+
+
+We say that the direct OLONs transformation via \cfps for program $P$ is the extended program $P^{d}$.
+
+\end{definition}
+
+
+%########################################### THEOREM
+
+\begin{theorem}[Soundness and completeness of the Direct OLONs transformation]
+\label{th:transfOLONd}
+From definition \ref{def:sigma} on page \pageref{def:sigma} resulted that for each direct OLON found, a rule in the form $a\leftarrow \sim Tail^{OLON}(a), PCs_{a}$ was added to the program.
+
+The program transformation defined in definition \ref{def:directOLONtrans} instead adds a rule stating $XOLON \leftarrow \sim Tails(X), X_{\iota}^{d}$.
+
+It holds that the set of rules added by the direct OLONs transformation via \cfps is equivalent to those of the RAA rule extension property for direct OLONs.
+
+%\begin{align*}
+%a\leftarrow \sim Tail^{OLON}(a), PCs_{a}\text{, for direct OLONs}\\
+%a_{i}\leftarrow \sim Tail^{OLON}(a_{i}), PC_{a_{i}}\text{, for indirect OLONs and}\\
+%Tail^{ICON}_{\lambda}(\alpha)\leftarrow PC_{\lambda_{n+1}},PC_{\mu_{n+1}}\text{ and}
+%Tail^{ICON}_{\mu}(\alpha)\leftarrow PC_{\mu_{n+1}},PC_{\lambda_{n+1}}\text{ for ICONs}
+%\end{align*}
+
+
+\begin{proof}
+
+The rules added by the transformation operate on two levels. The first level is that of the \cf transformation in itself, and the second is from the extension rules onward.
+
+On the \cf level we have, for a given NLP $P$, several copies of $P$ where each literal which has the potential for being provable by RAA is assumed as false.
+
+It is first important to show that this transformation won't allow atoms to be true if they are not provable by RAA. Consider, for example, that a literal $x$ is true in the $Pcf$ but wasn't in $P$. Then it became true by assuming its falsity, which means it was provable by \raa. Otherwise, assume that $x$ is part of a RAA pattern but is not true by the \cfp. Then, $x$ had no support under the \cfp, which means that either $PC(x)$ was false or $x$ was not in a RAA pattern.
+
+This point made, all $X_{\iota}^{d}$ which are true had to be part of $OLONs^{d}$ and had to had their preconditions true.
+
+This means that in the second level only are true those literals which were part of direct OLONs and had their preconditions true.
+
+Then, the conditions implied by
+
+\begin{align*}
+a\leftarrow \sim Tail^{OLON}(a), PCs_{a}\text{, given that a is the head of a direct OLON}
+\end{align*}
+
+are satisfied by 
+
+\begin{align*}
+& XOLON \leftarrow \sim Tails(X), X_{\iota}^{d}\\
+& XRAA \leftarrow XOLON\\
+& X \leftarrow XRAA
+\end{align*}
+
+%We now want to prove that the direct OLONs transformation via \cfps is equivalent to the extension rule added for direct OLONs. This rule states that $X\leftarrow\sim Tail, PCs$, if X is the head of an $OLON^{d}$. The transformation generates a program and adds a rule $X\leftarrow X_{\iota}^{d}, \sim Tail$.
+%
+%The first thing we want to prove is that if a literal can be proven by RAA and it is an $OLON^{d}$, it can be recognized with $Pcf^{d}$. As we generate PCFs for literals which have the potential for being proven by RAA, it could be the case that we generated a \cfp for a literal which was not part of an OLON. If this happened, two things could occur:
+%\begin{itemize}
+%	\item The literal was already true by classical support, in which case the \cfp doesn't add any new result;
+%	\item The literal was false by classical support, in which case if it came true by the CFP this means it was true by assuming its falsity which, in turn, proves that it was in an RAA pattern.
+%\end{itemize}
+%
+%So this settles that CFPs won't add to a model any conclusion they are not supposed to add. Additionally, as \cfps are, for all that matters, copies of the original program with the only change being the assumption of a certain default, the basic principle of \raa is implied in these programs.
+%
+%On the rule we add to the program, only one thing is not present -- the preconditions. However, they are present in the \cfp, as part of the original program. Therefore, when demanding $X_{\iota}^{d}$ to be true, we are insisting that $X$ has to be a direct OLON and that its preconditions have to be true -- otherwise it would be impossible to conclude $X_{\iota}^{d}$.
+\end{proof}
+\end{theorem}
+
+
+\subsubsection{Transforming Indirect OLONs}
+By the previous transformation we were able to transform a program so that literals that had the potential to be proven by RAA and were in direct OLONs could be concluded, i.e., were given classical support. We'll discuss now a similar transformation for indirect OLONs.
+
+Indirect OLONs, because of having a number of negative literals in their RAA chain of support greater than one, can't be concluded with the previous transformation, essentially because of the way it deals with default negated literals. Consider, for example, the following program and its \cf versions for $a$, $b$ and $c$:
+
+
+\begin{align*}
+P=\{& a\leftarrow\sim b			&				& 			\\
+		& b\leftarrow\sim c			&				& 			\\
+		& c\leftarrow\sim a\}		&				& 			\\
+		\\
+Pcf(a^{d})=\{	& a_{1}^{d}\leftarrow \sim b &	Pcf(b^{d})=\{	& 	a_{2}^{d}\leftarrow			&			Pcf(c^{d})=\{	& a_{3}^{d}\leftarrow \sim b\\
+              & b_{1}^{d}\leftarrow \sim c	&	&		b_{2}^{d}\leftarrow \sim c		&	& b_{3}^{d}\leftarrow\\
+							& c_{1}^{d}\leftarrow\}				&	&		c_{2}^{d}\leftarrow \sim a\}	&	& c_{3}^{d}\leftarrow \sim a\}
+\end{align*}
+
+For the known rSMs $\{a,b\}$, $\{b,c\}$ and $\{c,a\}$, the several rules in each \cfp would be removed by \go, unabling any of the interpretations to become models. This happens because indirect OLONs have their support over more than one negation, which although being considered in order to prove that a certain literal is in an indirect OLON, it is not relevant for the conclusions. Therefore, the negation in the indirect OLONs also has to be auxiliary:
+
+\begin{align*}
+Pcf(a^{i})=\{	& a_{1}^{i}\leftarrow \sim b_{1}^{i}	&	Pcf(b^{i})=\{& 	a_{2}^{i}\leftarrow							& Pcf(c^{i})=\{& a_{3}^{i}\leftarrow \sim b_{3}^{i}\\
+              & b_{1}^{i}\leftarrow \sim c_{1}^{i}	&	&		b_{2}^{i}\leftarrow \sim c_{2}^{i}		&	& b_{3}^{i}\leftarrow\\
+							& c_{1}^{i}\leftarrow\}			&		&		c_{2}^{i}\leftarrow \sim a_{2}^{i}\}	&	& c_{3}^{i}\leftarrow \sim a_{3}^{i}\}
+\end{align*}
+
+This way, the test of whether a certain literal is part of an indirect OLON or not is local and independent of the global interpretation we are testing. 
+
+On indirect OLONs we are also interested in propagating the OLONs we already proven, whether these are direct or indirect. This supports the existence of programs with direct and indirect OLONs depending on each other. However the rules we had for direct OLONs are not enough for this propagation. In some cases we might want to allow for a direct resolution of OLONs in order to conclude some indirect OLON if (and only if) this resolution is not global, i.e., the literal we are solving is not part of our interpretation. As this resolution is a direct one, we use the direct version of our \cf transformation, however imposing on each rule that the literal it is refering to cannot be concluded. This results in another set of rules to be added to our indirect \cfps:
+
+\begin{align*}
+\text{Local direct resolution rules for a}=\{	& a_{1}^{i}\leftarrow \sim b, \sim a\\
+              																& b_{1}^{i}\leftarrow \sim c, \sim b\\	
+																							& c_{1}^{i}\leftarrow \sim c\}\\
+\\
+\text{Local direct resolution rules for b}=\{ &	a_{2}^{i}\leftarrow	\sim a\\				
+																							&	b_{2}^{i}\leftarrow \sim c, \sim b\\
+																							&	c_{2}^{i}\leftarrow \sim a, \sim c\}\\
+\\
+\text{Local direct resolution rules for c}=\{ & a_{3}^{i}\leftarrow \sim b, \sim a\\
+																						  & b_{3}^{i}\leftarrow \sim b\\
+																						  & c_{3}^{i}\leftarrow \sim a, \sim c\}
+\end{align*}
+
+What each of these rules states is that under very strict conditions a certain literal $x_{\iota}^{i}$ can be concluded for local direct resolutions if it is not true in the model and if its direct preconditions are respected.
+
+Let's formalize these definitions:
+
+
+%########################################### DEFINITION
+\begin{definition}[Indirect \cfp Pcf]
+Let $P$ be a \nlp, $X$ an atom in $P$ which can be proven by \raa and $\iota$ (iota) an index identifying uniquelly $X$ in the set of literals of $P$ that can be proven by RAA.
+
+The \cfp for indirect OLONs of $X$ is constructed from a copy $Pcf(X ^{i})$ of $P$ by performing the following operations on $Pcf(X ^{i})$:
+
+\begin{enumerate}
+	\item Remove from all rules of $Pcf(X ^{i})$ the default literal $\sim X$;
+	\item Replace all literals $A$ in all rules with the auxiliary atom $A_{\iota}^{i}$;
+\end{enumerate}
+
+Note that the second operation was over literals instead of atoms, as in the definition for direct OLONs.
+
+Additionally, to this \cfp we add a copy of the direct OLONS \cfp $Pcf(X ^{d})$ where, on each rule we apply the following changes:
+
+\begin{enumerate}
+	\item Replace each head $A_{\iota}^{d}$ with $A_{\iota}^{i}$;
+	\item Add to the tail of each rule with head $A_{\iota}^{i}$ the default $\sim A$.
+\end{enumerate}
+
+We call $X_{\iota}^{i}$ the head of this \cfp.
+The heads of the rules from which $\sim X$ was removed form the set $Tails_{P}(X)$.
+\end{definition}
+
+
+
+
+
+
+%########################################### DEFINITION
+\begin{definition}[Indirect \CFPs Set]
+Let $P$ be a \nlp, $S$ the set of literals in $P$ which have the potential to be proven by \raa and an ordering $\iota\geq 0$ assiciating each literal in $S$ with a number $\iota$. 
+
+The set of all direct \cfps of $P$ regarding all literals in $S$ is the set
+
+\begin{center}
+\begin{math}
+{\beta}cf_{P}^{i} = \displaystyle\left( {\bigcup\limits_\iota  {Pcf(X_{\iota}^{i})} } \right)  
+\end{math}
+\end{center}
+
+with $\iota$ being the program's \cf index, incremented as a new literal is considered.
+\end{definition}
+
+
+
+
+%########################################### DEFINITION
+\begin{definition}[Propagation rules transformation for ${\beta}cf_{P}^{i}$]
+Let ${\beta}cf_{P}^{i}$ be the set of all indirect \cfps of the NLP $P$.
+
+The propagation rules transformation for each \cfp in ${\beta}cf_{P}^{i}$ consists of the following operation:
+
+\begin{itemize}
+	\item For each extended literal $x_{\iota}^{i}$ such that there exists a \cfp $Pcf(x^{i})$ with head $x_ {\kappa}^{i}$ add the rule $x_{\iota}^{i}\leftarrow x_ {\kappa}^{i}$ to the \cfp being considered.
+\end{itemize}
+\end{definition}
+
+
+
+%########################################### DEFINITION
+\begin{definition}[Rule extension transformation for ${\beta}cf_{P}^{i}$]
+\label{def:indirectOLONtrans}
+Let ${\beta}cf_{P}^{i}$ be the set of all direct \cfps of the NLP $P$.
+
+The rule extension transformation for each \cf head $X_{\iota}^{i}$ in ${\beta}cf_{P}^{i}$ consists of generating the following rule:
+
+\begin{align*}
+XOLON \leftarrow X_{\iota}^{i}, \sim Tails(X)
+\end{align*}
+
+where $\sim Tails(X)$ corresponds to $\sim t_{1}, \sim t_{2}, \ldots, \sim t_{n}$ if $Tails(X)={t_{1}, t_{2}, \ldots, t_{n}}$.
+
+Additionally, for each $XOLON$ generated, the following rules are also to be created:
+
+\begin{align*}
+&XRAA \leftarrow XOLON\\
+&X \leftarrow XRAA
+\end{align*}
+\end{definition}
+
+
+%########################################### DEFINITION
+
+\begin{definition}[Indirect OLONs transformation via \cfps]
+Let $P$ be a \nlp. 
+
+The Indirect OLONs transformation via \cfps of $P$ is the revised program $P^{i}$ which can be generated by the following operations:
+
+\begin{enumerate}
+\item Create the \cfp set ${\beta}cf_{P}^{i}$;
+\item Apply the Propagation Rules transformation and Rule extension transformation on ${\beta}cf_{P}^{i}$;
+\item Let $P^{i}={\beta}cf_{P}^{i}$.
+\end{enumerate}
+
+
+We say that the indirect OLONs transformation via \cfps for program $P$ is the auxiliary program $P^{i}$.
+
+\end{definition}
+
+
+
+%########################################### THEOREM
+
+\begin{theorem}[Soundness and completeness of the Indirect OLONs transformation]
+\label{th:transfOLONi}
+From definition \ref{def:sigma} on page \pageref{def:sigma} resulted that for each indirect OLON found, a rule in the form $a_{i}\leftarrow \sim Tail^{OLON}(a_{i}), PC_{a_{i}}$ was added to the program, for each possible $a_{i}$.
+
+The program transformation defined in definition \ref{def:indirectOLONtrans} instead adds a rule stating $XOLON \leftarrow \sim Tails(X), X_{\iota}^{d}$.
+
+It holds that the set of rules added by the indirect OLONs transformation via \cfps is equivalent to those of the RAA rule extension property for indirect OLONs.
+
+%\begin{align*}
+%a\leftarrow \sim Tail^{OLON}(a), PCs_{a}\text{, for direct OLONs}\\
+%a_{i}\leftarrow \sim Tail^{OLON}(a_{i}), PC_{a_{i}}\text{, for indirect OLONs and}\\
+%Tail^{ICON}_{\lambda}(\alpha)\leftarrow PC_{\lambda_{n+1}},PC_{\mu_{n+1}}\text{ and}
+%Tail^{ICON}_{\mu}(\alpha)\leftarrow PC_{\mu_{n+1}},PC_{\lambda_{n+1}}\text{ for ICONs}
+%\end{align*}
+
+
+\begin{proof}
+
+We have a two sets of rules which operate on two levels. The first level is that of the \cf transformation in itself, and the second is from the extension rules onward.
+
+On the \cf level we have, for a given NLP $P$, several copies of $P$ where each literal which has the potential for being provable by RAA is assumed as false.
+
+It is first important to show that this transformation won't allow atoms to be true if they are not provable by RAA. Consider, for example, that a literal $x$ is true in the $Pcf$ but wasn't in $P$. Then it became true by assuming its falsity, which means it was provable by \raa. Otherwise, assume that $x$ is part of a RAA pattern but is not true by the \cfp. Then, $x$ had no support under the \cfp, which means that either $PC(x)$ was false or $x$ was not in a RAA pattern.
+
+This point made, all $X_{\iota}^{i}$ which are true had to be part of $OLONs^{i}$ and had to had their preconditions true.
+
+This means that in the second level only are true those literals which were part of direct OLONs and had their preconditions true.
+
+Then, the conditions implied by
+
+\begin{align*}
+a\leftarrow \sim Tail^{OLON}(a), PCs_{a}\text{, given that a is the head of a direct OLON}
+\end{align*}
+
+are satisfied by 
+
+\begin{align*}
+& XOLON \leftarrow \sim Tails(X), X_{\iota}^{i}\\
+& XRAA \leftarrow XOLON\\
+& X \leftarrow XRAA
+\end{align*}
+
+\end{proof}
+\end{theorem}
+
+
+
+
+
+
+\subsubsection{Transforming ICONs}
+Now that we have defined a correct way of detecting OLONs, the only remaining pattern to be transformed are \icons. ICONs have the singularity of being infinite programs which in theory means that there is no practical way of calculating their models, in particular because models are calculated on grounded programs. However, a theoretical way of recognizing these patterns can be defined.
+
+ICONs are defined as having two rules supporting the same atom and eventually depending on contradictory tails. As there is no feasible way of detecting the head of the ICON and defining a rule for this head, the only pattern we can detect is the existence of rules with contradictory tails ($\sim X$ and $X$) and the existence of at least two rules with the same head.
+
+Consider, for example:
+
+\begin{align*}
+P=\{
+ &\alpha \leftarrow \lambda(1), PC_{\lambda(1)}		&			 &\alpha  \leftarrow \mu(1), PC_{\mu(1)} \\
+ &\lambda(1) \leftarrow \ldots												&			& \mu(1)  \leftarrow \ldots \\
+ &\ldots \leftarrow \lambda(n), PC_{\lambda(n)}		&			 &\ldots  \leftarrow \mu(n), PC_{\mu(n)} \\
+ &\lambda(n) \leftarrow \beta, PC_{\lambda(n+1)}		&			& \mu(n)  \leftarrow \sim \beta, PC_{\mu(n+1)} 
+\}
+\end{align*}
+
+The \cfp for $P$ consists of the following transformation:
+
+\begin{align*}
+P=\{
+& \alpha_{1}^{c} \leftarrow \lambda_{1}^{c}(1), PC_{\lambda_{1}^{c}(1)}		&			 &\alpha_{1}^{c}  \leftarrow \mu_{1}^{c}(1), PC_{\mu_{1}^{c}(1)} \\
+& \lambda_{1}^{c}(1) \leftarrow \ldots												&			 &\mu_{1}^{c}(1)  \leftarrow \ldots \\
+& \ldots \leftarrow \lambda_{1}^{c}(n), PC_{\lambda_{1}^{c}(n)}		&			& \ldots  \leftarrow \mu_{1}^{c}(n), PC_{\mu_{1}^{c}(n)} \\
+& \lambda_{1}^{c}(n) \leftarrow PC_{\lambda_{1}^{c}(n+1)}		&			 &\mu_{1}^{c}(n)  \leftarrow PC_{\mu_{1}^{c}(n+1)} 
+\}\end{align*}
+
+Note that there is only one \cfp generated, where we remove all the contradictory tails. The heads of the rules from which we removed our contradictory tails, if now are true, should provide support for a certain atom, the head of the ICON. We need now a basic condition for the existence of an ICON, besides that of the program being infinite. The condition is that there are at least two rules with the same head and at least two rules with contradictory tails. Given this condition, and for the previous program, our transformed version of the extension rules for ICONs is:
+
+\begin{align*}
+{\alpha}ICON \leftarrow \alpha_{1}^{c}, \lambda_{1}^{c}(n), \mu_{1}^{c}(n)
+\end{align*}
+Note, however, that an infinite number of these rules will exist. Additionally, $\alpha$ is provable by RAA if it is an ICON:
+
+\begin{align*}
+& {\alpha}RAA \leftarrow {\alpha}ICON\\
+& \alpha \leftarrow {\alpha}RAA
+\end{align*}
+
+Let's formalize these intuitions
+
+
+
+%########################################### DEFINITION
+\begin{definition}[Potential for ICON belonging]
+Let $P$ be a \nlp with $l$ rules in the form $r_k=H\leftarrow A_{1},\ldots,A_{m},\sim B_{1},\ldots,\sim B_{n}$ ($m,n\geq 0\ and\ 1\leq k\leq l$) and $X$ a literal.
+
+We say that $X$ has the potential for belonging to an \icon iff:
+
+\begin{align*}
+\exists_{r_{1},r_{2} \in P}:& X = head(r_{1}) \wedge\\
+                            & X = head(r_{2}) \wedge\\
+                            & \exists_{r_{3},r_{4} \in P}: r_{3} \text{ and } r_{4} \text{ have contradictory tails.}
+\end{align*}
+
+We say that two tails $Tail_{1}$ and $Tail_{2}$ are contradictory if some atom $X$ belongs to $Tail_{1}$ and $\sim X$ belongs to $Tail_{2}$.
+\end{definition}
+
+
+
+
+%########################################### DEFINITION
+\begin{definition}[ICON \cfp Pcf]
+Let $P$ be a \nlp, $X$ a literal in $P$ which has the potential to belong to an ICON.
+
+The \cfp for ICONs of $X$ is constructed from a copy $Pcf(icon)$ of $P$ by performing the following operations on $Pcf(icon)$:
+
+\begin{enumerate}
+	\item For each set of rules which have contradictory tails, remove the contradictory literals from their tails;
+	\item Replace all literals $A$ in all rules with the auxiliary literal $A_{1}^{c}$.
+\end{enumerate}
+
+We call all literals $X_{1}^{c}$ which have the potencial of belonging to an ICON the possible heads of this \cfp.
+The heads of the rules which had contradictory tails form the set $Tails_{P}(X)$.
+\end{definition}
+
+
+
+
+
+
+
+%########################################### DEFINITION
+\begin{definition}[Rule extension transformation for $Pcf(icon)$]
+\label{def:transfICON}
+Let $Pcf(icon)$ be the \cfp for ICONs of the NLP $P$.
+
+The rule extension transformation for each possible head $X_{\iota}^{c}$ in $Pcf(icon)$ consists of generating the following rules for each combination of possible heads and pair of tails:
+
+\begin{align*}
+XICON \leftarrow X_{\iota}^{c}, Tails(X)
+\end{align*}
+
+Additionally, for each $XICON$ generated, the following rules are also to be created:
+
+\begin{align*}
+& XRAA \leftarrow XICON\\
+& X \leftarrow XRAA
+\end{align*}
+\end{definition}
+
+
+%########################################### DEFINITION
+
+\begin{definition}[ICONs transformation via \cfps]
+Let $P$ be a \nlp. 
+
+The ICONs transformation via \cfps of $P$ is the revised program $P^{c}$ which can be generated by the following operations:
+
+\begin{enumerate}
+\item Create the \cfp $Pcf(icon)$ from $P$;
+\item Apply the Rule extension transformation on $Pcf(icon)$;
+\item Let $P^{c}=Pcf(icon)$.
+\end{enumerate}
+
+
+We say that the ICONs transformation via \cfps for program $P$ is the auxiliary program $P^{c}$.
+
+\end{definition}
+
+
+
+%########################################### THEOREM
+
+\begin{theorem}[Soundness and completeness of the ICONs transformation]
+\label{th:transfICON}
+From definition \ref{def:sigma} on page \pageref{def:sigma} resulted that for each ICON found, two rules in the form 
+
+\begin{align*}
+Tail^{ICON}_{\lambda}(\alpha)\leftarrow PC_{\lambda_{n+1}},PC_{\mu_{n+1}}\\
+Tail^{ICON}_{\mu}(\alpha)\leftarrow PC_{\mu_{n+1}},PC_{\lambda_{n+1}}
+\end{align*}
+
+were added to the program.
+
+The program transformation defined in definition \ref{def:transfICON} instead adds several rule stating 
+
+\begin{align*}
+XICON \leftarrow X_{\iota}^{c}, Tails(X)
+\end{align*}
+
+one for each literal which has the potential for belonging to an ICON.
+
+It holds that the set of rules added by the ICONs transformation via \cfps is equivalent to those of the RAA rule extension property for ICONs.
+
+\begin{proof}
+For ICONs only one \cfp is generated, from which we derive rules from pairs of rules. As there is no feasible way of detecting an ICON, we can only suspect that there is one if at least two rules with the same head exist and two rules with contradictory tails also exist.
+
+This being the case, we say that a certain atom $X$ is true because of being involved in an ICON if both heads became true because of the contradiction having been removed. Additionally, as we are now creating dependency directly on the tail of the ICON, the preconditions don't need to be tested in particular -- if they are true they will provide support for the ICON. Otherwise they won't.
+
+Furthermore, let's suppose that some atom $X$ was not part of an ICON and was false in the model. If $X$ comes true from this transformation, then a chain of support had to exist between $X$ and its tails. This is however proves that $X$ was part of an ICON. Let's now suppose that $X$ was part of an ICON. The only way for $X$ not to be concludable by the \cfp transformation for ICONs, and not be part of the model, is if any of its preconditions are false, now that the contradictory tails have been removed. This not being the case, $X$ has to be true.
+
+Therefore, the transformation is equivalent to the rule extension for ICONs.
+\end{proof}
+
+\end{theorem}
+
+
+
+\subsection{Transformational Semantics for the \rsms}
+Given the previous transformations we can now define the \gro for \rsms:
+
+
+
+%########################################### DEFINITION
+\begin{definition}[$\Gamma^{r}$ operator]
+\label{def:gro}
+Let $P$ be a \nlp and $I$ a \twovi. 
+
+The revised program $P^{r}$ is the following sequence of operations:
+
+\begin{enumerate}
+
+\item Generate the Direct OLONs transformed program $P^{d}$;
+\item Generate the Indirect OLONs transformed program $P^{i}$;
+\item Generate the ICONs transformed program $P^{c}$;
+\item Let $P^{r}=P^{d} \cup P^{i} \cup P^{c} \cup P$.
+\end{enumerate}
+
+On $P^{r}$ apply $\Gamma(I)$ and remove all \cfa literals from the resulting set $F$.
+
+We say that $\Gamma^{r}(I) = \Gamma_{P^{r}}(I) = F$
+
+\end{definition}
+
+
+We can now provide an alternative definition of the \rsms semantics based on this operator:
+
+
+\begin{definition}[\RSMs and Semantics redefinition]
+Let $P$ be a \nlp and $I$ a \twovi. 
+
+We say that $I$ is a \rsm of $P$ iff $\Gamma^{r}(I) = I$.
+\end{definition}
+
+
+\begin{theorem}[Soundness and completeness regarding the \rsms semantics]
+Having firstly defined the RAA rule extension property and the equivalence between this property and the \cfps defined in the previous section, we can now show that a program transformation based on the \cfps is equivalent to the \rsms.
+\begin{proof}
+As by theorems \ref{th:transfOLONd}, \ref{th:transfOLONi} and \ref{th:transfICON} all the \cfps generated are equivalent to the extension rules added by $\Sigma_{P}$, and because $\Gamma^{r}$ employs these transformations, by theorem \ref{th:ruleRSM} $I$ is a \rsm of $P$ iff $\Gamma^{r}(I) = I$.
+\end{proof}
+
+\end{theorem}
+
+
+
+
+\subsection{Transformational Semantics for the \rwfs}
+Following the same approach Baral and Subrahmanian used in \cite{wfsDualities}, we now define \grSq and the rWFS based on this operator.
+
+
+
+
+%########################################### DEFINITION
+\begin{definition}[\grSq]
+Let $P$ be a NLP and $I$ an interpretation. 
+
+The \grSq is defined as being two applications of the \gro:
+\begin{align*}
+\Gamma_{P}^{r^{2}}(I) = \Gamma_{P}^{r}(\Gamma_{P}^{r}(I))
+\end{align*}
+\end{definition}
+
+At this point we can prove the only property of the rWFS for which a proof was still missing, that the \rwfs can be calculated by a monotonous and continuous operator.
+
+\begin{theorem}[\grSq is a monotonous and continuous operator]
+It holds that \grSq is a monotonous and continuous operator.
+
+\begin{proof}
+As for any \nlp $P$, $\Gamma^{r}_{P} = \Gamma_{P^{r}}$, where $P^{r}$ is the original program $P$ transformed according to the $\Gamma^{r}$ operator, we have:
+
+\begin{align}
+\Gamma_{P}^{r^{2}} & = \Gamma_{P}^{r}(\Gamma_{P}^{r}) \Leftrightarrow\\
+\Leftrightarrow	\Gamma_{P}^{r}(\Gamma_{P}^{r}) & = \Gamma_{P^{r}}(\Gamma_{P^{r}}) \Leftrightarrow\\
+\Leftrightarrow	\Gamma_{P^{r}}(\Gamma_{P^{r}}) & = \Gamma_{P^{r}}^{2}
+\end{align}
+
+However, $\Gamma^{2}$ applied on any \nlp is a monotonous and continuous operator, so the theorem is trivially true.
+\end{proof}
+
+\end{theorem}
+
+
+
+
+
+%########################################### DEFINITION
+\begin{definition}[\RWFM and Semantics alternative definition]
+Let $P$ be a NLP.
+
+The \RWFS of program $P$ is the tuple $\left\langle {\cal{T}}_{rWFM},{\cal{TU}}_{rWFM} \right\rangle$, with \tRWFM corresponding to the true literals according to the \rwfs and \tuRWFM being the true or undefined literals according to the \rwfs.
+
+The \tRWFM set can be calculated as being the least fixed point of \grSq operator starting with the empty interpretation, i.e., ${\cal{T}}_{rWFM}=$$\Gamma_{P}^{r^{2}\text{ }\uparrow \omega}$, with $\omega$ the least limit ordinal.
+
+The \tuRWFM set can be calculated as being the next iteration of $\Gamma_{P}^{r}$, starting from the \tWFM set, i.e., ${\cal{TU}}_{rWFM}=$$\Gamma_{P}^{r}({\cal{T}}_{rWFM})$.
+\end{definition}
+
+
+
+
+\begin{theorem}[Soundness and completeness regarding the \rwfs]
+Following the same approach of the redefinition of the \rsms, an alternative definition of the \rwfs can be presented, based on two applications of the \go.
+
+\begin{proof}
+As by theorems \ref{th:transfOLONd}, \ref{th:transfOLONi} and \ref{th:transfICON} all the \cfps generated are equivalent to the extension rules added by $\Sigma_{P}$, and because \grSq employs these transformations, by theorem \ref{th:ruleRWFS} $I=\left\langle {\cal{T}}_{rWFM},{\cal{TU}}_{rWFM} \right\rangle$ is the \rwfm of $P$ iff ${\cal{T}}_{rWFM}=$$\Gamma_{P}^{r^{2}\text{ }\uparrow \omega}$, with $\omega$ the least limit ordinal, and ${\cal{TU}}_{rWFM}=$$\Gamma_{P}^{r}({\cal{T}}_{rWFM})$.
+\end{proof}
+
+\end{theorem}
+
+
+Additionally, we can now define the \rpsms as being non-minimal fixed points of \grSq operator:
+
+\begin{definition}[\RPSMs]
+Let $P$ be a \nlp and $I$ a \threevi. 
+
+$I=\cal{T}\cup\sim \cal{F}$ is a \rpsm of P iff:
+\begin{itemize}
+	\item ${\cal{T}} = \Gamma^{r^{2}}({\cal{T}})$
+	\item ${\cal{T}} \subseteq \Gamma^{r}({\cal{T}})$
+	\item ${\cal{F}} = {\cal{H}}_{P}\setminus \Gamma^{r}({\cal{T}})$
+\end{itemize}
+Revised \psms can be represented in a lattice, just like its non-RAA counterpart, where each node corresponds to a fixed point of \grSq. The minimal fixed point is the rWFM.
+\end{definition}
+
+
+
+
+
+A thorough study of all the complexity issues of the \rwfs is out of the scope of this thesis. However, a brief account on this subject can be provided, thus enabling us to say that the calculation of the rWFM has polynomial complexity.
+
+\begin{theorem}[The calculation of the rWFM has polynomial complexity]
+Let $P$ be a \nlp and $rWFM_{P}=\langle{\cal{T}}^{r},{\cal{TU}}^{r}\rangle$ the \rwfm of a \nlp $P$.
+
+It holds that the complexity of generating the \rwfm is polynomial.
+
+
+\begin{proof}
+Consider $WFM(P)$ the complexity of calculating the \wfm of a \nlp $P$. We know that $WFM(P)$ is polynomial.
+
+Let's also consider $tr(P)$ the complexity of generating the program transformations required for \cfps of the \nlp $P$. We know that this process includes the generation of four copies of the original program for each literal which has the potential of being provable by RAA. 
+
+Let's call $copy(P)$ the generation of a copy of program $P$. Generating a copy of a program is a deterministic procedure which, in our case, includes renaming all literals to their \cf versions and removing some default literals. These operations, however, can be applied as the copies of the rules of the program are being generated, meaning that we have ${\cal{O}}(copy(P))=n$, with $n$ being the number of literals which had the potential for being provable by RAA.
+
+The transforming procedure will need to perform four copies of the program: one for direct OLONs, two for indirect OLONs and one for ICONs. Therefore we have that:
+
+\begin{align}
+	& {\cal{O}}(rWFS_{P}) = \\
+=	& {\cal{O}}(WFM(tr(P))) = \\
+=	& {\cal{O}}(WFM(4 \times copy(P))) = \\
+=	& {\cal{O}}(WFM(4 \times n)) =\\
+=	& \text{polynomial complexity}
+\end{align}
+
+\end{proof}
+
+\end{theorem}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Examples}
+In this section we show the transformation of two simple programs, essentially to illustrate the \cfps transformation. Given the complexity of the transformation, we include only two examples and leave the rest of the results to the appendix \ref{ap:examples}.
+
+
+\begin{example}[OLON with inner OLON\footnote{This example is due to Sérgio Lopes}]
+\begin{align*}
+P=\{& a \leftarrow x\\
+		& x \leftarrow y, \sim x\\
+		& y\leftarrow \sim a	\}
+\end{align*}
+
+In this program we have two literals which have the potential for being provable by RAA, $a$ and $x$. We will create \cfps for both literals, both direct and indirect because we don't know for sure what kind of OLONs we may be dealing with here.
+We start with the \cfps for direct OLONS:
+\begin{align*} 
+Pcf(a^{d})=\{& a_{1}^{d} \leftarrow x_{1}^{d}						&		Pcf(x^{d})=\{& a_{2}^{d} \leftarrow x_{2}^{d}\\
+						 & x_{1}^{d} \leftarrow y_{1}^{d}, \sim x		&			 				 	 & x_{2}^{d} \leftarrow y_{2}^{d}\\
+				 		 & y_{1}^{d} \leftarrow	  									&								 & y_{2}^{d} \leftarrow \sim a\\
+				 		 & x_{1}^{d} \leftarrow x_{2}^{d}\}         &                & a_{2}^{d} \leftarrow a_{1}^{d}\}
+				 		 \\
+						 & aOLON \leftarrow a_{1}^{d}, \sim y\\
+						 & xOLON \leftarrow x_{2}^{d}
+\end{align*}
+
+We also generate the \cfps for indirect OLONs:
+\begin{align*} 
+Pcf(a^{i})=\{& a_{1}^{i} \leftarrow x_{1}^{i}						&		Pcf(x^{i})=\{& a_{2}^{i} \leftarrow x_{2}^{i}\\
+				 & x_{1}^{i} \leftarrow y_{1}^{i}, \sim x_{1}^{i}		&			 				 	 & x_{2}^{i} \leftarrow y_{2}^{i}\\
+				 		 & y_{1}^{i} \leftarrow											&								 & y_{2}^{i} \leftarrow \sim a_{2}^{i}\\
+			& a_{1}^{i} \leftarrow x_{1}^{i},\sim a 					&		& a_{2}^{i} \leftarrow x_{2}^{i}, \sim a\\
+				 & x_{1}^{i} \leftarrow y_{1}^{i}, \sim x				&			 				 	 & x_{2}^{i} \leftarrow y_{2}^{i}, \sim x\\
+				 		 & y_{1}^{i} \leftarrow	\sim y							&								 & y_{2}^{i} \leftarrow \sim a, \sim y\\
+				 		 & x_{1}^{i} \leftarrow x_{2}^{i}\}         &                & a_{2}^{i} \leftarrow a_{1}^{i}\}
+				 		 \\
+						 & aOLON \leftarrow a_{1}^{i}, \sim y\\
+						 & xOLON \leftarrow x_{2}^{i}
+\end{align*} 
+
+And finally the rules which connect with the original literals:
+\begin{align*} 
+\text{Extension Rules}=\{
+	& aRAA\leftarrow aOLON\\
+	& xRAA\leftarrow xOLON\\
+	& a\leftarrow aRAA\\
+	& x\leftarrow xRAA\}
+\end{align*}
+
+The only \sm of the program $P^{r} = P\cup Pcf(a^{d})\cup Pcf(x^{d})\cup Pcf(a^{i})\cup Pcf(x^{i}) \cup \text{Extension Rules}$ is $rSM_{1}=\{a, aRAA, aOLON, x_{1}^{i}, y_{1}^{i}, a_{1}^{i}, a_{2}^{i}, a_{1}^{d}, x_{1}^{d}, y_{1}^{d}\}$, from which we remove all the extended literals and end up with $rSM_{1}=\{a\}$.
+
+\end{example}
+
+
+
+
+
+\begin{example}[Indirect OLON]
+\begin{align*}
+P=\{& a \leftarrow \sim b\\
+		& b \leftarrow \sim c\\
+		& c \leftarrow \sim a\}
+\end{align*}
+
+In this program, all literals have the potential for being proven by RAA so we generate all possible \cfps. We start with the \cfps for direct OLONS:
+\begin{align*} 
+Pcf(a^{d})=\{	& a_{1}^{d}\leftarrow \sim b &	Pcf(b^{d})=\{	& 	a_{2}^{d}\leftarrow			&			Pcf(c^{d})=\{	& a_{3}^{d}\leftarrow \sim b\\
+              & b_{1}^{d}\leftarrow \sim c,	&	&		b_{2}^{d}\leftarrow \sim c		&	& b_{3}^{d}\leftarrow\\
+							& c_{1}^{d}\leftarrow			  	&	&		c_{2}^{d}\leftarrow \sim a	&	& c_{3}^{d}\leftarrow \sim a\\
+							& b_{1}^{d}\leftarrow b_{2}^{d} & & a_{2}^{d}\leftarrow a_{1}^{d} & & b_{3}^{d}\leftarrow b_{2}^{d}\\
+							& c_{1}^{d}\leftarrow c_{3}^{d}\} & & c_{2}^{d}\leftarrow c_{3}^{d}\} & & a_{3}^{d}\leftarrow a_{1}^{d}\}\\
+		\\
+						 & aOLON \leftarrow a_{1}^{d}, \sim c\\
+						 & bOLON \leftarrow b_{2}^{d}, \sim a\\
+						 & cOLON \leftarrow c_{3}^{d}, \sim b
+\end{align*}
+
+We also generate the \cfps for indirect OLONs:
+\begin{align*} 
+Pcf(a^{i})=\{	& a_{1}^{i}\leftarrow \sim b_{1}^{i}	&	Pcf(b^{i})=\{& 	a_{2}^{i}\leftarrow		& Pcf(c^{i})=\{& a_{3}^{i}\leftarrow \sim b_{3}^{i}\\
+              & b_{1}^{i}\leftarrow \sim c_{1}^{i}	&	&		b_{2}^{i}\leftarrow \sim c_{2}^{i}		&	& b_{3}^{i}\leftarrow\\
+							& c_{1}^{i}\leftarrow									&	&		c_{2}^{i}\leftarrow \sim a_{2}^{i}	&	& c_{3}^{i}\leftarrow \sim a_{3}^{i}\\
+							& a_{1}^{i}\leftarrow \sim b, \sim a  & &		a_{2}^{i}\leftarrow	\sim a						& & a_{3}^{i}\leftarrow \sim b, \sim a\\
+							& b_{1}^{i}\leftarrow \sim c, \sim b  & &		b_{2}^{i}\leftarrow \sim c, \sim b		& & b_{3}^{i}\leftarrow \sim b\\
+							& c_{1}^{i}\leftarrow \sim c 				& &		c_{2}^{i}\leftarrow \sim a, \sim c		& & c_{3}^{i}\leftarrow \sim a, \sim c\\
+							& b_{1}^{i}\leftarrow b_{2}^{i} & & a_{2}^{i}\leftarrow a_{1}^{i} & & b_{3}^{i}\leftarrow b_{2}^{i}\\
+							& c_{1}^{i}\leftarrow c_{3}^{i}\} & & c_{2}^{i}\leftarrow c_{3}^{i}\} & & a_{3}^{i}\leftarrow a_{1}^{i}\}\\
+				 		 \\
+						 & aOLON \leftarrow a_{1}^{i}, \sim c\\
+						 & bOLON \leftarrow b_{2}^{i}, \sim a\\
+						 & cOLON \leftarrow c_{3}^{i}, \sim b
+\end{align*} 
+
+And finally the rules which connect with the original literals:
+\begin{align*} 
+\text{Extension Rules}=\{
+	& aRAA\leftarrow aOLON\\
+	& bRAA\leftarrow bOLON\\
+	& cRAA\leftarrow cOLON\\
+	& a\leftarrow aRAA\\
+	& b\leftarrow bRAA\\
+	& c\leftarrow cRAA\}
+\end{align*}
+
+This program will now have three rSMs:
+
+\begin{align*} 
+rSM_{1}=\{a, b,aRAA, aOLON, b_{2}^{d}, a_{3}^{i},\ldots\} = \{a,b\}\\
+rSM_{2}=\{b, c,bRAA, bOLON, c_{3}^{d}, b_{1}^{i},\ldots\} = \{b,c\}\\
+rSM_{3}=\{c, a,cRAA, cOLON, c_{2}^{i}, a_{1}^{d},\ldots\} = \{c,a\}
+\end{align*}
+
+
+\end{example}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Concluding Remarks}
+Having first identified the property of rule extension for \rsms, we defined a theoretical operator, one that if it was possible to find out all RAA patterns of a program, it would add rules to the program so that RAA patterns would enjoy classical support. From this idea we created a program transformation that followed the same principle, but skipped the step of detecting OLONs / ICONs by creating \cfps. This is what enabled us to define \gro, which can be used to calculate the \rsms and the \rwfm of a \nlp. We also proved the last of the properties set in section \ref{sec:motivRWFS} -- that the \rwfs is definable by a monotonous and continuous operator.

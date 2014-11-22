@@ -1,0 +1,19 @@
+Procedimento
+================================
+
+
+1. entrar no XSB.
+2. consultar translator.P
+3. gerar a tradução do ficheiro original com consultEvol('ficheiro.P'). vai ser gerado um ficheiro rule.P que pode ser consultado a partir do XASP.
+
+4. abrir outro prolog
+5. entrar no modo xnmr 
+	?- [xnmr].
+6. consultar o ficheiro rule.P
+7. os comandos disponíveis agora são
+	- sm. 			- calcula os modelos estáveis no instante actual
+	- sm(N).		- calcula os modelos estáveis no instante N.
+	- holds(X).		- calcula os modelos de X
+	- holds(X,N).	- calcula os modelos de X em N
+	- current(N).	- N é o último instante (o mais recente)
+

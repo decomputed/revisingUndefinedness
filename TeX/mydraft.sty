@@ -1,0 +1,30 @@
+%%%%%%%%%%%%%%
+% Draft
+
+\def\draft{\def\@oddfoot{\vtop to 0pt{\vskip0pt\normalsize\tt
+D R A F T\hfill\today, \realtime\hfill D R A F T}}
+\def\@evenfoot{\@oddfoot}}
+
+\def\fix{\ifcase\oldtime 0\or0\or0\or%
+0\or0\or0\or0\or0\or0\or0\fi}
+\def\fixtiming{\ifcase\timing 0\or0\or0\or% 
+0\or0\or0\or0\or0\or0\or0\fi}
+\newcount\timing 
+\newcount\hourcount
+\newcount\oldtime 
+
+\def\realtime{\timing=\time \oldtime=\time
+\ifnum\timing>60 \divide\timing by 60
+\hourcount=\the\timing
+\multiply\timing by 60
+\advance\oldtime by-\timing
+\ifnum\hourcount<12 \number\hourcount:\fix\number\oldtime am\fi%
+\ifnum\hourcount=12 \number\hourcount:\fix\number\oldtime pm\fi%
+\ifnum\hourcount>12 \advance\hourcount by-12
+\number\hourcount:\fix\number\oldtime pm\fi
+\else12:\fixtiming\number\timing am\fi}
+
+%%\newcommand{\today}{\ifcase\month\or
+%%  January\or February\or March\or April\or May\or June\or
+%%  July\or August\or September\or October\or November\or December\fi
+%%  \space\number\day, \number\year}

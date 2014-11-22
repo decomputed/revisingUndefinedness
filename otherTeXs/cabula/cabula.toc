@@ -1,0 +1,5 @@
+\select@language {portuguese}
+\contentsline {section}{\numberline {1}Stable Models Semantics\cite {sm}}{3}
+\contentsline {section}{\numberline {2}Well-Founded Semantics\cite {wfs}}{4}
+\contentsline {section}{\numberline {3}Revised Stable Models Semantics\cite {rsmMain}}{5}
+\contentsline {section}{\numberline {4}Disjunctive Well-Founded Semantics\cite {wfsdMain}}{7}

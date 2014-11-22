@@ -1,0 +1,5 @@
+- fazer o summary em inglês
+- fazer as intros dos minitocs
+- faltam os programas de exemplo na rWFS e nos rSM
+- falta rever uma cena importante - afinal como é q o operador funciona....????
+- 

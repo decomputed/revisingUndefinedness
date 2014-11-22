@@ -1,0 +1,264 @@
+\documentclass[12pt]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Created=Mon Oct 02 17:16:05 2000}
+%TCIDATA{LastRevised=Mon Oct 02 17:28:23 2000}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="General\Blank Document">}
+%TCIDATA{CSTFile=LaTeX article (bright).cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+
+
+\begin{document}
+
+
+\begin{center}
+{\large The Axioms of Absolute Geometry -Part 1\bigskip }
+\end{center}
+
+\textbf{The Incidence Axioms}\smallskip 
+
+\emph{Points},\emph{\ lines} and\emph{\ planes} are undefined terms.
+
+\begin{description}
+\item[I-1]  All lines and planes are sets of points.
+
+\item[I-2]  Given any two points, there is exactly one line containing them
+
+\item[I-3]  Given any three noncollinear points, there is exactly one plane
+containing them.
+
+\item[I-4]  If two points lie in a plane $E$, then the line containing the
+two points lies in $E.$
+
+\item[I-5]  If two planes intersect, their intersection is a line.
+
+\item[I-6]  Every line contains at least two points and there are at least
+three noncollinear points. Every plane contains at least three noncollinear
+points and there are at least four noncoplanar points.
+\end{description}
+
+\textbf{The Betweenness Axioms\smallskip }
+
+The notion of \emph{betweenness}, as in ``the point $B$ is between the
+points $A$ and $C$'', is taken to be an undefined term. If a point $B$ is
+between the points $A$ and $C$, we write $A-B-C$.
+
+It is assume that betweenness satisifies the following five axioms:
+
+\begin{description}
+\item[B-1]  If $A-B-C$, then $C-B-A$. (If $B$ is between $A$ and $C$, then $B
+$ is between $C$ and $A$.)
+
+\item[B-2]  Given three collinear points $A,B$ and $C,$ then exactly one of
+the following is true: $A-B-C$, $B-A-C$, or $A-C-B$. (Given any three
+collinear points, exactly one point is between the other two.)
+\end{description}
+
+\begin{definition}
+Let $A,B,C,$ and $D$ be four collinear points. We write $A-B-C-D$ provided
+each of the following relations hold: $A-B-C$, $A-B-D$, $A-C-D$, and $B-C-D$.
+\end{definition}
+
+\begin{description}
+\item[B-3]  Any four points of a line can be named in order $A,B,C,$and $D,$
+in such a way that $A-B-C-D$.
+
+\item[B-4]  If $A$ and $B$ are any two points, then there is a point $D$
+such that $A-B-D$ and there is a point $C$ such that $A-C-B$.
+
+\item[B-5]  If $A-B-C$, then $A,B,$ and $C$ are collinear.
+\end{description}
+
+We are now ready to introduce the definition of line segment, ray and angle.
+
+\begin{definition}
+(line segment) If $A$ and $B$ are two points, the line segment between $A$
+and $B$ is the set points between $A$ and $B$ together with $A$ and $B$.
+This line segment is usually denoted $\overline{AB}$.
+\end{definition}
+
+Note that $\overline{AB}=\left\{ C:A-C-B\right\} \cup \left\{ A\right\} \cup
+\left\{ B\right\} $.
+
+\begin{definition}
+(ray) Let $A,B$ be two points. The\emph{\ ray with from }$A$\emph{\ through }%
+$B$, denoted $\overrightarrow{AB}$, is the set of all points $C$ such that $%
+C-A-B$ does not hold. The point $A$ is called the\emph{\ end point} of the
+ray.
+\end{definition}
+
+\begin{definition}
+(angle) An\emph{\ angle} is the union of two rays which have the same
+endpoint but do not lie on the same line. If the angle is the union of the
+rays $\overrightarrow{AB}$ and $\overrightarrow{AC}$, the angle is denoted
+by $\angle BAC$. The rays $\overrightarrow{AB}$ and $\overrightarrow{AC}$
+are called the \emph{sides of the angle} and the point $A$ is called the 
+\emph{vertex of the angle}.
+\end{definition}
+
+Here are a couple of sample theorems which can be established using the
+above axioms and definitions.
+
+\begin{theorem}
+If $A$ and $B$ are two points, then $\overline{AB}=\overline{BA}$.
+\end{theorem}
+
+\begin{theorem}
+Let $\overrightarrow{AB}$ be a ray. If $C$ is a point on $\overrightarrow{AB}
+$, then $\overrightarrow{AB}=\overrightarrow{AC}$.\medskip 
+\end{theorem}
+
+\textbf{The plane separation axiom\smallskip }
+
+\begin{definition}
+A set $K$ is said to be \emph{convex} provided that the line segment $%
+\overline{AB}$ is contained in $K$ whenever the points $A$ and $B$ are in $K.
+$
+\end{definition}
+
+\begin{description}
+\item[PS-1]  (Plane separation axiom) Given a line and a plane containing
+it, the set of all points of the plane that do not lie on the line is the
+union of two disjoint sets $H_{1}$ and $H_{2}$ such that each of the sets is
+convex and if $P$ belongs to one of the sets and $Q$ belongs to the other,
+then the segment $\overline{PQ}$ intersects the line. Each of these sets is
+called a\emph{\ half plane}.
+\end{description}
+
+\begin{definition}
+Let $l$ be a line and let $A,B$ be points. If $A$ and $B$ are in a half
+plane with edge $l$, then $A$ and $B$ are said to be on the same side of $B.$
+If $E=H_{1}\cup l\cup H_{2}$, where $H_{1}$ and $H_{2}$ are the half planes
+given by the plane separation axiom, then $H_{1}$ and $H_{2}$ are called
+opposite sides of $l$.. Two points $A,B$ are said to be on opposite sides of 
+$l$ if there is a plane $F$ be a plane containing $l$ , $A,$ and $B$, $%
+F=G_{1}\cup l\cup G_{2}$ where $G_{1}$ and $G_{2}$ are half planes $A\in
+G_{1}$ and $B\in G_{2}$
+\end{definition}
+
+\textbf{Angle Measurement Axioms\medskip }
+
+We let $m(\angle ABC)$ denote\emph{\ the measure of the angle }$\angle ABC.$
+It is assumed that the measure of an angle is a real number.
+
+\begin{description}
+\item[AM-1]  Given an angle $\angle A$, $m$ assigns one and only one real
+number to $\angle A$.
+
+\item[AM-2]  For every angle $\angle A$, $m\angle A$ is between $0$ and $180$%
+.
+
+\item[AM-3]  (Angle Construction Axiom) Let $\overrightarrow{AB}$ be a ray
+on the edge of a half plane $H$. For every number $\alpha $ between $0$ and $%
+180$ there is exactly one ray $\overrightarrow{AC}$ in $H$ such that $%
+m\left( \angle BAC\right) =\alpha $.
+
+\item[AM-4]  (Angle Addition Postulate). If $D$ is in the interior of $%
+\angle ABC$, then $m\left( \angle ABC\right) =m\left( \angle ABD\right)
++m\left( \angle DBC\right) $.
+\end{description}
+
+Recall that two angles are \emph{supplementary} if the sum of their measures
+is $180$.
+
+\begin{description}
+\item[AM-5]  (Supplement Axiom) If two angles form a linear pair, then they
+are supplementary.
+\end{description}
+
+In a metric geometry, two angles are defined to be\emph{\ congruent} if they
+have the same measure.
+
+\begin{theorem}
+Let $\angle ABC$ be any angle, $\overrightarrow{B^{\prime }C^{\prime }}$ a
+ray and $H$ a half-plane with an edge that contains $\overrightarrow{%
+B^{\prime }C^{\prime }}.$ then there is exactly one ray $\overrightarrow{%
+B^{\prime }A^{\prime }}$, $A^{\prime }$ in $H,$ such that $\angle ABC\cong
+\angle A^{\prime }B^{\prime }C^{\prime }.$.\medskip 
+\end{theorem}
+
+\begin{theorem}
+If $D$ is in the interior of $\angle ABC$, $D^{\prime }$ is in the interior
+of $\angle A^{\prime }B^{\prime }C^{\prime },$ $\angle ABD\cong \angle
+A^{\prime }B^{\prime }D^{\prime }$ and $\angle DBC\cong \angle D^{\prime
+}B^{\prime }C^{\prime },$ then $\angle ABC\cong \angle A^{\prime }B^{\prime
+}C^{\prime }.\medskip $
+\end{theorem}
+
+\begin{definition}
+If $D$ is in the interior of $\angle ABC$, $D^{\prime }$ is in the interior
+of $\angle A^{\prime }B^{\prime }C^{\prime },$ $\angle ABD\cong \angle
+A^{\prime }B^{\prime }D^{\prime }$ and $\angle ABC\cong \angle A^{\prime
+}B^{\prime }C^{\prime },$ then $\angle DBC\cong \angle D^{\prime }B^{\prime
+}C^{\prime }.$\smallskip 
+\end{definition}
+
+\begin{definition}
+Let $\overrightarrow{AB}$ and $\overrightarrow{AC}$ be opposite rays and $D$
+a point not on the line $\overleftrightarrow{CB}.$ Then $\angle BAD$ and $%
+\angle DAC$ form a linear pair.\smallskip 
+\end{definition}
+
+\begin{definition}
+If $m\left( \angle ABC\right) +m\left( \angle DEF\right) =$ $180,$ then $%
+\angle ABC$ and $\angle ABC$ are called supplementary angles\smallskip 
+\end{definition}
+
+\begin{definition}
+If the angles of a linear pair are congruent, then each of them is called a
+right angle.\smallskip 
+\end{definition}
+
+\begin{definition}
+Two rays are called perpendicular if their union is a right angle. An angle
+is acute if its measure is less than $90^{\circ }$ and obtuse if their
+measure is greater than $90^{\circ }.\smallskip $
+\end{definition}
+
+\begin{definition}
+Two angles form a vertical pair if their sides form pairs of opposite rays.
+Note that if $C^{\prime }-A-C$ and $B^{\prime }-A-B$, then $\angle BAC$ and $%
+\angle B^{\prime }AC^{\prime }$ are a pair of vertical angles$.$
+Alternatively, if $\overrightarrow{AC^{\prime }}$ and $\overrightarrow{AC}$
+are opposite rays and $\overrightarrow{AB^{\prime }}$ and $\overrightarrow{AB%
+}$ are opposite rays, then $\angle BAC$ and $\angle B^{\prime }AC^{\prime }$
+are a pair of vertical angles. Moreover, any pair of vertical angles can be
+labelled $\angle BAC$ and $\angle B^{\prime }AC^{\prime }$ in such a way as
+to have $C^{\prime }-A-C$ and $B^{\prime }-A-B$
+\end{definition}
+
+Now for a rather famous theorem:\medskip
+
+\begin{theorem}
+(Vertical Angle Theorem) It two angles form a vertical pair, then they are
+congruent.
+\end{theorem}
+
+\end{document}
+

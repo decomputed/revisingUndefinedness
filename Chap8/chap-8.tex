@@ -1,0 +1,919 @@
+%%#################################################################
+%% CHAPTER 8.
+%%#################################################################
+\chapter{Implementation Source Code}
+
+\begin{ChapAbstract}
+Where we present the implementation source code of the \gro translator and the rWFM calculator
+\end{ChapAbstract}
+
+\section{\gro translator}
+The \gro translator basically processes a file with a \nlp and generates the program transformation for direct and indirect OLONs. This transformed program can then be called from within a stable model calculator and its stable models will correspond to the \rsms of the original program.
+
+This part of the implementation is divided in several modules.
+\subsection{translator.P}
+
+\begin{verbatim}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   Includes 
+
+
+
+:- import concat_atom/2 from string.
+:- import term_to_atom/2 from string.
+:- import term_to_codes/2 from string.
+:- import atom_to_term/2 from string.
+:- import append/3 from basics.
+:- import length/2 from basics.
+:- import member/2 from basics.
+:- import flatten/2 from basics.
+
+:- dynamic pos/1, neg/1, raa/1, tails/2.
+
+:- consult('raa2.P').
+:- consult('direct.P').
+:- consult('indirect.P').
+:- consult('tails.P').
+:- consult('preprocess.P').
+
+
+%%%%%%%%%%%%%%% READING THE MAIN PROGRAM
+
+consultRaa(File):-
+	clearall,
+	generateRAAset(File),
+	raa(RAASet),
+	generateTailSet(RAASet,File),
+	tell('raa.P'),
+	generateProgramCopy(File),
+	generateDirectCFP(RAASet,File),
+	generateIndirectCFP(RAASet,File),
+	generateAuxRules(RAASet),
+	told,
+	consult('raa.P').
+
+	
+
+%%%%%%%%%%%%%%%%%%%%%% auxiliary rules
+
+generateAuxRules([H|T]):-
+	concat_atom([H,raa],HeadRAA),
+	translateLiteral(H,DirectH,direct,H),
+	translateLiteral(H,IndirectH,indirect,H),
+	tails(H,TailSet),
+	generateTailNegation(NegatedTail,TailSet),
+	concat_atom([NegatedTail,',',IndirectH],IndirectH2),
+	concat_atom([NegatedTail,',',DirectH],DirectH2),
+	saveTable(DirectH),
+	saveRule(HeadRAA,DirectH2),
+	saveRule(HeadRAA,IndirectH2),
+	saveRule(H,HeadRAA),
+	generateAuxRules(T).
+	
+generateAuxRules([]).
+
+
+
+%%%%%%%%%%%%%%%%%%% generate tnots for tails
+generateTailNegation(NegatedTail,[H|T]):-
+	concat_atom([tnot,'(',H,')'],OneTail),
+	generateTailNegation(SubNegatedTail,T),
+	concat_atom([OneTail,',',SubNegatedTail],PreNegatedTail),
+	NegatedTail = PreNegatedTail.
+		
+		
+generateTailNegation(NegatedTail,[]):-
+	NegatedTail = true.
+
+	
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% generates all direct cfps	
+generateDirectCFP([H|T],File):-
+	generateDirectOLONSet(H,File),
+	generateDirectCFP(T,File).
+
+generateDirectCFP(Atom,File):-
+	generateDirectOLONSet(Atom,File).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% generates all indirect cfps	
+generateIndirectCFP([H|T],File):-
+	generateIndirectOLONSet(H,File),
+	generateIndirectCFP(T,File).
+
+generateIndirectCFP(Atom,File):-
+	generateIndirectOLONSet(Atom,File).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% generates the RAA set and asserts it
+
+generateRAAset(File):-
+	see(File),
+	loadClauses(raa,null),
+	generateRAAset,
+	seen.
+
+generateProgramCopy(File) :-
+	see(File),
+	loadClauses(preprocess,null),
+	seen.
+
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% tails set
+generateTailSet([H|T],File):-
+	generateTails(H,File),
+	generateTailSet(T,File).
+	
+generateTailSet([],_).
+	
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% for one tail
+
+generateTails(Atom,File) :-
+	see(File),
+	loadClauses(tail,Atom),
+	setof(X,tails(Atom,X),AllTails),
+	retractall(tails(Atom,_)),
+	flatten(AllTails,AllTails2),
+	remove(ni,AllTails2,AllTails3),
+	assert(tails(Atom,AllTails3)),
+	seen.
+	
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Generates a direct cfp for some atom
+	
+generateDirectOLONSet(Atom,File):-
+	see(File),
+	loadClauses(direct,Atom),
+	seen.
+	
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Generates a direct cfp for some atom
+	
+generateIndirectOLONSet(Atom,File):-
+	see(File),
+	loadClauses(indirect,Atom),
+	seen.
+
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% loadclauses....
+
+loadClauses(X,Atom) :-
+	read(C),
+	( C = end_of_file -> true;
+      (
+      	%write(C),nl,
+		(
+			(
+				X = raa,
+				processRAA(C)
+			);
+			(
+				X = direct,
+				processDirect(C,Atom)
+			);
+			(
+				X = indirect,
+				processIndirect(C,Atom)
+			);
+			(
+				X = tail,
+				processTail(Tails,C,Atom),
+				assert(tails(Atom,Tails))
+			);
+			(
+				X = preprocess,
+				process(C)
+			);
+			true
+		),
+      	loadClauses(X,Atom)
+      )
+    ).
+    
+	
+clearall:-
+	retractall(pos(_)),
+	retractall(neg(_)),
+	retractall(raa(_)),
+	retractall(tails(_,_)).
+
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Writes a rule to wherever we're telling/1
+%
+
+writeRule(Head) :-
+	write(Head), write('.'), nl.
+
+writeRule(Head,Tail) :-
+	write(Head), write(':-'), write(Tail), write('.'), nl.
+	
+
+
+translateLiteral(H,NewH,Mode,Atom):-
+	(
+		(
+			Mode = direct,
+			raa(RAAset),
+			ith(Iota,RAAset,Atom),
+			concat_atom([H,Iota,d],NewH)		
+		);
+		(
+			Mode = indirect,
+			raa(RAAset),
+			ith(Iota,RAAset,Atom),
+			concat_atom([H,Iota,i],NewH)		
+		)
+	).
+	
+	
+saveTable(Head) :-
+	write(':-table '),write(Head), write('/0.'), nl.
+
+	
+	
+remove(X,[X|Xs],Ys) :-
+	!,
+	remove(X,Xs,Ys).
+	
+remove(Z,[X|Xs],[X|Ys]) :-
+	!,
+	remove(Z,Xs,Ys).
+
+remove(_,[],[]).
+
+
+\end{verbatim}
+
+
+\subsection{raa2.P}
+
+\begin{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%     A :- B
+
+processRAA((H :- B)) :-
+	(
+		B \= [],
+		addPos(H),
+		processRAABody(B)
+	);
+	true.
+
+
+%%%%%%%%%%%%%%%%%%%%%     A
+
+processRAA((H)) :-
+	processRAA((H :- [])).
+
+
+%%%%%%%%%%%%%%%%%%%%%     Body processing	
+
+processRAABody((L,Rest)) :-
+	addNeg(L),
+	processRAABody(Rest).
+
+
+processRAABody(L) :-
+	addNeg(L).
+	
+
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%  we use pos(X) to say that X appeared once in the head of a rule
+%%  and neg(X) to say that X appeared once denied in the tail of a rule
+
+
+addPos(X) :-
+	retractall(pos(X)),
+	assert(pos(X)).
+
+addNeg((not X)) :-
+	retractall(neg(X)),
+	assert(neg(X)).
+
+addNeg(_).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%  in raa/1 is a list with all the literals which have potential
+%%  of being provable by RAA
+
+
+generateRAAset :-
+	bagof(X,(pos(X),neg(X)),RAA),
+	assert(raa(RAA)),
+	retractall(pos(_)),
+	retractall(neg(_)).
+
+	
+	
+\end{verbatim}
+
+
+\subsection{direct.P}
+
+\begin{verbatim}
+:- import concat_atom/2 from string.
+:- import ith/3 from basics.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%   generation of direct CFPs
+
+
+processDirect((H :- B),Atom) :-
+	translateLiteral(H,NewH,direct,Atom),
+	processDirectBody(B,Atom,NewB),
+	(
+		(
+			raa(RAAset),
+			ith(_,RAAset,H),
+			H \= Atom,
+			%translateLiteral(H,NewH2,direct,H),
+			concat_atom([H,raa],NewH2),
+			saveRule(NewH,NewH2)
+		);
+		true
+	),
+	saveRule(NewH,NewB).
+
+processDirect((H),Atom) :-
+	translateLiteral(H,NewH,direct,Atom),
+	saveFact(NewH).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% body processing
+
+processDirectBody((A ',' R),Atom,NewBody) :- 
+	processDirectBody(A,Atom,NewHead),
+	processDirectBody(R,Atom,NewTail),
+	concat_atom([NewHead, ',', NewTail],NewBody).
+
+
+
+processDirectBody((not R),Atom,NewAtom):- 
+	(
+		R \= Atom,
+		concat_atom([tnot,'(',R,')'],NewAtom),
+		saveTable(R)
+	);
+	(
+		concat_atom([true],NewAtom)
+	).
+
+
+processDirectBody((R),Atom,NewAtom):- 
+	translateLiteral(R,NewAtom,direct,Atom).
+	
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%    UTILS
+%%
+
+
+translateLiteral(H,NewH,Mode,Atom):-
+	(
+		(
+			Mode = direct,
+			raa(RAAset),
+			ith(Iota,RAAset,Atom),
+			concat_atom([H,Iota,d],NewH)		
+		);
+		(
+			Mode = indirect,
+			raa(RAAset),
+			ith(Iota,RAAset,Atom),
+			concat_atom([H,Iota,i],NewH)		
+		)
+	).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Writes a rule to wherever we're telling/1
+%
+
+saveFact(Head) :-
+	write(Head), write('.'), nl.
+
+saveRule(Head,Tail) :-
+	write(Head), write(':-'), write(Tail), write('.'), nl.
+
+saveTable(Head) :-
+	write(':-table '),write(Head), write('/0.'), nl.
+
+\end{verbatim}
+
+
+\subsection{indirect.P}
+
+\begin{verbatim}
+:- import concat_atom/2 from string.
+:- import ith/3 from basics.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%   generation of indirect CFPs
+
+
+processIndirect((H :- B),Atom) :-
+	translateLiteral(H,NewH,indirect,Atom),
+	(
+		(
+			raa(RAAset),
+			ith(_,RAAset,H),
+			H \= Atom,
+			%translateLiteral(H,NewH2,indirect,H),
+			concat_atom([H,raa],NewH2),
+			saveRule(NewH,NewH2)
+		);
+		true
+	),
+	processIndirectBody(B,Atom,NewB),
+	processIndirectBody2(B,Atom,NewB2),
+	concat_atom([NewB2,',',tnot,'(',H,')'],NewB3),
+	saveRule(NewH,NewB),
+	saveRule(NewH,NewB3).
+
+processIndirect((H),Atom) :-
+	translateLiteral(H,NewH,indirect,Atom),
+	saveFact(NewH).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% body processing
+
+
+processIndirectBody((A ',' R),Atom,NewBody) :- 
+	processIndirectBody(A,Atom,NewHead),
+	processIndirectBody(R,Atom,NewTail),
+	concat_atom([NewHead, ',', NewTail],NewBody).
+
+processIndirectBody((not R),Atom,NewAtom):- 
+	(
+		R \= Atom,
+		translateLiteral(R,NewR,indirect,Atom),
+		concat_atom([tnot,'(',NewR,')'],NewAtom),
+		saveTable(NewR)
+	);
+	(
+		concat_atom([true],NewAtom)
+	).
+
+
+
+processIndirectBody((R),Atom,NewAtom):- 
+	translateLiteral(R,NewAtom,indirect,Atom).
+	
+
+processIndirectBody2((A ',' R),Atom,NewBody) :- 
+	processIndirectBody2(A,Atom,NewHead),
+	processIndirectBody2(R,Atom,NewTail),
+	concat_atom([NewHead, ',', NewTail],NewBody).
+
+
+processIndirectBody2((not R),Atom,NewAtom):- 
+	(
+		R \= Atom,
+		concat_atom([tnot,'(',R,')'],NewAtom)
+	);
+	(
+		concat_atom([true],NewAtom)
+	).
+
+
+
+processIndirectBody2((R),Atom,NewAtom):- 
+	translateLiteral(R,NewAtom,indirect,Atom).
+	
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%    UTILS
+%%
+
+
+translateLiteral(H,NewH,Mode,Atom):-
+	(
+		(
+			Mode = direct,
+			raa(RAAset),
+			ith(Iota,RAAset,Atom),
+			concat_atom([H,Iota,d],NewH)		
+		);
+		(
+			Mode = indirect,
+			raa(RAAset),
+			ith(Iota,RAAset,Atom),
+			concat_atom([H,Iota,i],NewH)		
+		)
+	).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Writes a rule to wherever we're telling/1
+%
+
+saveFact(Head) :-
+	write(Head), write('.'), nl.
+
+saveRule(Head,Tail) :-
+	write(Head), write(':-'), write(Tail), write('.'), nl.
+
+saveTable(Head) :-
+	write(':-table '),write(Head), write('/0.'), nl.
+
+\end{verbatim}
+
+
+\subsection{tails.P}
+
+\begin{verbatim}
+:- dynamic tempTails/1.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     A :- B
+
+processTail(Tails,(H :- B),Atom) :-
+	(
+		assert(tempTails(ni)),
+		B \= [],
+		processTailBody(H,B,Atom),
+		setof(X,tempTails(X),PossibleTails),
+		Tails = PossibleTails,
+		retractall(tempTails(_))
+	);
+	true.
+
+
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     A
+
+processTail(Tails,(H),Atom) :-
+	processTail(Tails,(H :- []),Atom).
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     Body processing	
+
+processTailBody(H,(A ',' R),Atom) :- 
+	processTailBody(H,A,Atom),
+	processTailBody(H,R,Atom).
+
+
+processTailBody(H,(not R),Atom):- 
+	R = Atom,
+	Atom \= H,
+	assert(tempTails(H)).
+
+
+
+processTailBody(_,(R),_).
+
+\end{verbatim}
+
+
+\subsection{preprocess.P}
+
+
+\begin{verbatim}
+:- import concat_atom/2 from string.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%     A :- B
+
+process((H :- B)) :-
+	processBody(B,Body),
+	saveRule(H,Body).
+
+
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%     A
+
+processTail((H)) :-
+	saveFact(H).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%     Body processing	
+
+processBody((A ',' R),Body) :- 
+	processBody(A,Body1),
+	processBody(R,Body2),
+	concat_atom([Body1,',',Body2],Body).
+
+
+processBody((not R),Body):- 
+	concat_atom([tnot,'(',R,')'],Body).
+
+
+
+processBody((R),R).
+
+
+
+saveRule(Head,Tail) :-
+	write(Head), write(':-'), write(Tail), write('.'), nl.
+
+	
+saveFact(Head) :-
+	write(Head), write('.'), nl.
+
+\end{verbatim}
+
+
+
+\section{\RWFM calculator}
+The \rwfm calculator simulates the inner working of the \grSq operator. As the $r$ part in \grSq is actually the transformation performed by the \gro translator, this implementation actually calculates the \wfm of a given program, by performing all the steps described in the \go twice.
+
+This implementation is also divided into three modules.
+
+\subsection{revised.P}
+
+
+\begin{verbatim}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   Includes 
+
+:- import concat_atom/2 from string.
+:- import term_to_atom/2 from string.
+:- import term_to_codes/2 from string.
+:- import atom_to_term/2 from string.
+:- import append/3 from basics.
+:- import length/2 from basics.
+:- import member/2 from basics.
+:- import flatten/2 from basics.
+
+:- dynamic herbrand/1.
+
+
+
+:- consult('gl.P').
+:- consult('herbrand.P').
+
+% Main function
+
+
+calculateRWFM(T,TU,File) :-
+	getT(T,File,[]),
+	gamma(T,TU,File).
+
+getT(T,File,I) :-
+	gammaSquared(I,M,File),
+	I = M,!,
+	T = I.
+
+getT(T,File,I) :-
+	gammaSquared(I,M,File),
+	getT(T,File,M).
+	
+
+gammaSquared(I,M,File) :-
+	gamma(I,M1,File),
+	gamma(M1,M,File),!.
+
+gammaSquared(I,M,File).
+
+
+
+
+gamma(I,M,File) :-
+	clearall,
+	tell('p_modulo_i.P'),
+	glTransform(I,File),
+	told,
+	leastModel,
+	herbrand(H),
+	callTp(H,M),!.
+
+gamma(I,M,File).
+	
+glTransform(I,File) :-
+	see(File),
+	loadClauses(I,ni),
+	seen.
+
+
+leastModel:-
+	see('p_modulo_i.P'),
+	loadClauses([],herbrand),
+	seen,
+	load_dyn('p_modulo_i.P'),	
+	setof(X,herbrand(X),AllHerbrands),
+	retractall(herbrand(_)),
+	flatten(AllHerbrands,AllHerbrands2),
+	remove(true,AllHerbrands2,AllHerbrands3),
+	remove(fail,AllHerbrands3,AllHerbrands4),
+	removeDuplicates(AllHerbrands4,H),
+	assert(herbrand(H)).
+	%write(H),nl.
+	%callTp(H,M),
+	%write('sai...'),nl.
+
+	
+
+callTp([H|T],[H|R]) :-
+	call(H),
+	callTp(T,R).
+		
+callTp([H|T],R) :-
+	not call(H),
+	callTp(T,R).
+	
+callTp([],[]).
+
+
+
+
+loadClauses(I,Mode) :-
+	read(C),
+	( C = end_of_file -> true;
+      (
+      	%write(C),nl,
+		(
+			Mode = herbrand,
+			processHerbrand(C,MiniHerbrand),
+			assert(herbrand(MiniHerbrand))
+		);
+		(
+			processGL(C,I)
+		);
+		true
+	  ),
+	loadClauses(I,Mode)
+    ).
+    
+
+
+clearall:-
+	retractall(herbrand(_)).
+
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Writes a rule to wherever we're telling/1
+%
+
+writeRule(Head) :-
+	write(Head), write('.'), nl.
+
+writeRule(Head,Tail) :-
+	write(Head), write(':-'), write(Tail), write('.'), nl.
+
+
+
+
+memberList(X,[X|_]).
+memberList(X,[_|Tail]):- 
+   memberList(X,Tail).
+   
+removeDuplicates([],[]).
+
+removeDuplicates([X|L],Pruned):-
+	memberList(Y,L), X==Y, !,
+	removeDuplicates(L,Pruned).
+
+removeDuplicates([X|L],[X|Pruned]):-
+	removeDuplicates(L,Pruned).
+\end{verbatim}
+
+
+
+\subsection{herbrand.P}
+
+\begin{verbatim}
+:- import concat_atom/2 from string.
+:- import ith/3 from basics.
+:- import member/2 from basics.
+
+
+:- dynamic tempHerbrand/1.
+
+
+processHerbrand((H :- B),MiniHerbrand) :-
+	H \= [],
+	assert(tempHerbrand(H)),
+	processHerbrandBody(B),
+	setof(X,tempHerbrand(X),PossibleHerbrand),
+	MiniHerbrand = PossibleHerbrand,
+	retractall(tempHerbrand(_)).
+		
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% body processing
+
+
+processHerbrandBody((A ',' R)) :- 
+	processHerbrandBody(A),
+	processHerbrandBody(R).
+
+
+processHerbrandBody((R)) :-
+	assert(tempHerbrand(R)).
+	
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Writes a rule to wherever we're telling/1
+%
+
+saveFact(Head) :-
+	write(Head), write('.'), nl.
+
+saveRule(Head,Tail) :-
+	write(Head), write(':-'), write(Tail), write('.'), nl.
+
+saveTable(Head) :-
+	write(':-table '),write(Head), write('/0.'), nl.
+
+\end{verbatim}
+
+
+
+\subsection{gl.P}
+\begin{verbatim}
+:- import concat_atom/2 from string.
+:- import ith/3 from basics.
+:- import member/2 from basics.
+
+
+processGL((H :- B),I) :-
+	H \= [],
+	processGLBody(B,NewBody,I),
+	saveRule(H,NewBody),
+	saveDynamic(H).
+
+processGL((H),_) :-
+	saveRule(H,true).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% body processing
+
+
+processGLBody((A ',' R),NewBody,I) :- 
+	processGLBody(A,NewHead,I),
+	processGLBody(R,NewTail,I),
+	concat_atom([NewHead, ',', NewTail],NewBody).
+
+
+
+
+processGLBody((tnot(R)),NewAtom,I):- 
+	(
+		member(R,I),
+		concat_atom([fail],NewAtom)
+	);
+	concat_atom([true],NewAtom).
+
+
+
+processGLBody((R),R,_):-
+	saveDynamic(R).
+	
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Writes a rule to wherever we're telling/1
+%
+
+saveFact(Head) :-
+	write(Head), write('.'), nl.
+
+saveRule(Head,Tail) :-
+	write(Head), write(':-'), write(Tail), write('.'), nl.
+
+saveDynamic(Head) :-
+	write(':-dynamic '),write(Head), write('/0.'), nl.
+
+\end{verbatim}

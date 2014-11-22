@@ -1,0 +1,122 @@
+%%#################################################################
+%% CHAPTER 1.
+%%#################################################################
+\chapter{Introduction}
+\label{cha:introduction}
+
+
+\begin{ChapAbstract}
+Where we briefly present the motivational setting for this thesis, the problems we intend to address and the main contributions of this work. In this chapter we also outline the structure and contents of each chapter.
+\end{ChapAbstract}
+	
+\vspace*{0,5cm}
+\begin{flushright}
+	\begin{tabular}{l}
+		\small \textsl{I know, I know for sure,}\\
+  	\small \textsl{That life is beautiful around the world (\ldots)}\\
+		\hline
+		\scriptsize Red Hot Chili Peppers. Around the World. In \textsl{Californication}.\\
+  	\scriptsize Warner Bros., 1999.
+	\end{tabular}
+	
+\end{flushright}
+
+\vspace*{1,5cm}
+
+\section{Motivation}
+\label{sec:motiv}
+The concerns of what was known for sure were among the things that puzzled Anthony Kiedis of the Red Hot Chili Peppers, whether these concerns were with how life was around the world or what to say to a girl when she says ``Hello\ldots''\cite{californication}. To know these things for sure would imply that he had analyzed every relevant fact and rule regarding the beauty of life around the world (and conversations with girls) and, given one single observation of the world, he would be able to conclude what was true or false, and what was impossible to say if it was true or false. This single view would be skeptical, cautionate in the way it attributed truth or falsity to things. And for those cases where things weren't absolutely true or false, this view would say that things should be undefined.
+
+Undefinedness helps enforcing a skeptical view of the world. It's a truth value used to refer to things whose truthness can't be determined. Things fall in this category, for example, when there are situations in which a certain thing is true, and other situations where the same thing is false. Things might also fall in this category when, for some reason the truth value of something just can't be determined or things depend on already undefined things. In either case it's more cautious to say that things are undefined than to compromise with truth or falsity.
+
+The reasoning behind this idea was captured under a precise semantics for logic programs, around 1990. The \WFS\cite{wfsMain}(WFS) has several desirable properties as a semantics for logic programs, namely cumulativity, relevancy and existence. Furthermore, it ensures uniqueness of model, its \wfm is computable in polynomial time and several WFS implementations (\cite{xsbSite,xsbArticle,branchBound,alternatingFixpoint}) have been studied and exist nowadays. Moreover, several important relations exist between the \wfs and \nmr formalisms\cite{wfsDualities,wfsGeneralized}, as well as between the \wfs and the \sms semantics\cite{wfsCoincides,wfsRelation}, another important semantics for \nmr. Additionally, the WFS was later expanded to its explicit\cite{jjaPhD,wfsxArticle}, paraconsistent\cite{paraconsistentArticle} and disjunctive\cite{alcantaraPhD} counterparts.
+
+Under the \wfs, atoms can be true, false or undefined. They are said to be true if and only if they are undoubtfully true, i.e., they have classical support and when transitioning to a two-valued context with several (possible) models, they are true in all models. Literals are said to be undefined if they fall in one of the following cases:
+
+\begin{itemize}
+	\item Either they are part of a two-valued choice (true in some worlds, false in others) but never undeniably true or false;
+	\item Or they are not classically supported;
+	\item Or they depend on an already undefined literal, as in one of the previous cases.
+\end{itemize}
+
+Otherwise, they are false.
+
+It's easy to see that literals that are part of choices should be undefined -- choices are made in a two-valued context so things are either true or false. In a three-valued context, as they can't be true and false at the same time they remain undefined. 
+
+For this consider the example:
+\begin{align*}
+P=\{& a \leftarrow not b\\
+		& b \leftarrow not a\}
+\end{align*}
+
+The \wfm of $P$ is empty, with both $a$ and $b$ being undefined. This is so because when $a$ is true $b$ is false, and vice-versa.
+
+Additionally, if a literal depends on an already undefined literal it should also be undefined\footnote{Although it can be argued that, in some cases, some conclusions may be derived from literals which already were undefined, namely when we are referring to choices. We dedicate some attention to this possibility in the conclusions.} -- undefinedness propagates throughout the program. 
+
+As an example, consider:
+\begin{align*}
+P=\{& a \leftarrow not b\\
+		& b \leftarrow not a\\
+		& c \leftarrow a\\
+		& c \leftarrow b\}
+\end{align*}
+
+The program has two stable models, $SM_{1}=\{a,c\}$ and $SM_{2}=\{b,c\}$, and the stable models semantics of the program is $\{c\}$, which is the intersection of its models. However, this does not correspond to the WFS; even though $c$ is true in all two-valued worlds (according to the \sms) it depends on undefined literals and as such it is also undefined.
+
+Finally, we have a case with a literal which has no classical support in the sense that the conclusions are supported by a set of premises:
+\begin{align*}
+P=\{& a \leftarrow not a\}
+\end{align*}
+
+$a$ depends on its own negation, which is not a valid premise as it would lead us to a contradiction. Therefore the WFM of this program is empty, with $a$ being undefined. However, lack of classical support could be overcome with the introduction of another form of support or with an extension to classical support, as in the case of the principle of \RAA\footnote{It has generated some controversy whether or not the principle of \raa should be considered a classical form of reasoning. We will deal with this question in greater detail in chapter \ref{cha:rwfs} leaving for now the idea that in the context of this thesis we will consider the RAA principle a nonclassical form of support.}. This will be the theme of this thesis.
+
+
+
+\section{Approach}
+As we stated before, it's easy to see that literals that are part of choices should be undefined, as well as those that are dependent on atoms which already are undefined. Lack of classical support, however, could be overcome by the introduction of another form of support. By enabling other forms of support, the WFS would gain expressiveness and the ability to correctly deal with programs which required non-classical forms of reasoning. One such program is the following:
+\begin{align*}
+P=\{ & go\_out\_with\_me\leftarrow sad\\
+		 & sad \leftarrow not\text{ }go\_out\_with\_me\}
+\end{align*}
+
+This program represents one possible reasoning behind asking a girl out on a date. What the program is stating is that she should go out with me\footnote{Without loss of generality\ldots} if she is sad. Furthermore, she will be sad if doesn't go out with me. Under this scenario, and given that the girl in question doesn't want to be sad, she could start by questioning herself, for instance, what would happen if she refused the invitation. By assuming the hypothesis $not\text{ }go\_out\_with\_me$, she should be sad. However, being sad is precisely the precondition for ``going out with me'', contradicting the original hypothesis. Therefore, she couldn't refuse the invitation -- she would ``go out with me''.
+
+The reasoning behind this program is not a classical one, in the sense that the conclusions don't actually depend on a set of true premises -- they depend on the impossibility of one of the negated premises being false, as this falsity would be contradictory with respect to the conclusion. The literal $go\_out\_with\_me$ is actually concluded by reasoning by absurdity, a form of \emph{unclassical} support. However, as the \wfs doesn't employ this kind of support, both atoms $\{go\_out\_with\_me, sad\}$ would be undefined in the \wfm. Let's consider another example, still in the same context:
+\begin{align*}
+P=\{ & go\_out\_with\_me\leftarrow sad\\
+		 & sad \leftarrow not\text{ }go\_out\_with\_me,\text{ }not\text{ }get\_drunk\\
+		 & get\_drunk\leftarrow bored\\
+		 & bored \leftarrow not\text{ }get\_drunk\}
+\end{align*}
+
+Under this program, we are stating that the previous girl will be sad not only if she doesn't go out with me, but also if she doesn't get drunk. Regarding the ingestion of alcoholic drinks, she will usually get drunk if she is bored. However, she will get bored if she is not drunk. Following the reasoning behind the previous example, this girl will always be drunk. This state will prevent her from being sad and, therefore, of going out with me. Once again, under the \wfs, all atoms will be undefined. However, if we were able to reason by absurdity in the WFS, we would conclude $drunk$, while everything else would be false.
+
+This \emph{reasoning by absurdity} follows the principle of \raa (RAA), which states that an hypothesis should be true if by assuming it is false this assumption leads to a contradiction. In that case, our conclusion is that our hypothesis should be true. 
+
+The application of this principle has already been studied in the \SMs Semantics\cite{smMain} (SMs) and enabled the \RSMs\cite{ampMSc,rsmEpia} (rSMs) to solve the problems associated with the SMs, while also enjoying the advantages associated with them. It also provided with an initial proof that the principle of RAA could effectively be used as a form of \emph{unclassical} support. 
+
+
+Studying the application of this principle in the \wfs will be the subject of this thesis.
+
+
+\section{Contributions and Outline}
+In this thesis we propose to study and implement the application of the \raa principle to the \wfs, with the purpose of contributing with more expressive results in a three-valued context, by recurring to undefined only when dealing with choices or with propagation. The study of the application of the RAA principle in the WFS will also provide a way of transitioning between a three-valued semantics with RAA support and the the \rsms, these also sharing the same form of \emph{unclassical} support. We will dub this semantics the \RWFS (rWFS) and study the definition and calculation of its \RWFM (rWFM).
+
+The introduction of this semantics further provides the following contributions:
+
+\begin{itemize}
+	\item The study of the application of the principle of \raa in a three-valued scenario, as well as the implications this introduction would have when defining a semantics based in this principle;
+	\item The definition of the principle of \raa in a three-valued context, which is an extension of the original principle, only valid in a two-valued context;
+	\item The definition and brief study of the \rpsms, a complete counterpart of the \psms, where the path between the rWFM and the rSMs always exists and is only the result of choices on undefined literals;
+	\item The study of RAA patterns and the consequent definition of a fixed-point operator $\Gamma^{r}$ which is the counterpart of the \GFo $\Gamma$, with support for RAA reasoning;
+	\item The definition of the \rsms semantics and the \rwfs through the use of \gro, and other further explorations in the \rsms semantics.
+\end{itemize}
+
+
+This thesis is organized as follows: Chapter \ref{cha:SoA} presents the historical and theoretical settings of this work and discusses the achievements of the three most relevant semantics in the context of this thesis. It ends with an account of the role played by each semantics and what role the rWFS should play.
+
+In Chapter \ref{cha:rwfs} we define the \rwfs. We start with an extensive motivation for the introduction of this semantics and we define the principle of RAA in a three-valued setting. We then provide several preliminary definitions which will enable us to contextualize the RAA principle and present the declarative definition of the rWFS. We then study its properties and present some examples of the calculation of the \rwfm.
+
+In chapter \ref{cha:grExtension} we start with a new property of the \rsms, RAA rule extension, which will enable us to define a syntactic transformation for rSMs and the rWFS. After defining this transformation we present some programs and the calculation of their \rsms and \rwfm.
+
+This thesis ends with a discussion of some open issues and concluding remarks.

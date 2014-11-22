@@ -1,0 +1,62 @@
+%%#################################################################
+%% CHAPTER 5.
+%%#################################################################
+\chapter{Concluding Remarks and Future Work}
+\label{cha:conclusions}
+
+\begin{ChapAbstract}
+Where we present the open issues that arose with the introduction of the principle of \RAA in the \WFS, and outline some possible next steps in this thread of research.
+\end{ChapAbstract}
+
+\section{Concluding Remarks and Future Work}
+With the conclusion of this step in this \emph{revised} family of semantics, some final remarks should be pointed out.
+
+First, that the definition of this semantics followed a quite different path from the previous semantics in this family of revised semantics. While the \rsms were defined because of the problems the \sms had, we started this thesis preciselly by pointing out that the \wfs had no problems whatsoever, in our view. Not only are they always capable of determining a model for a given \nlp, as the fact that it doesn't deal correctly with certain program patterns should be viewed more like a feature than a fault. This allows us to point out that the rWFS is not a substitute of the WFS, but rather a counterpart, which extends it in a three-valued setting by allowing another form of reasoning -- reasoning by absurdity.
+
+On the other hand, the rWFS ended up filling a gap which had been opended with the introduction of the rSMs -- that of the transition between a three-valued context to a two-valued one \emph{with} RAA support. By introducing the \rwfs, we made it possible to have this transition defined, namelly through the introduction of the \rpsms. The fact that this transition is now well defined brings both semantics closer and opens new possibilities of finding more relations between them, much like the same way several relations were eventually found between the \sms and the \wfs.
+
+Additionally, there is the issue of using the principle of \raa as a form of support. While this had already been done in the \rsms semantics, it was now implemented in the context of a three-valued semantics. It not only proved that the principle is a valid one for reasoning in nonmonotonic contexts, as it proved it maintains its validity when we introduce another truth value.
+
+Finally, it's worth pointing out that the relation between these two semantics and their non-RAA counterparts is now much closer, mainly because of the definition of the \gro. Firstly it is of great importance the fact that the property of RAA rule extension was defined, as this was a missing piece in defining a program transformation whose \sms would correspond to the \rsms. Additionally, the fact that we used an extension of the already well-known and used \go, allows us to present these revised semantics as the original ones with a plug-in called \raa. This, indeed, shows how close they are, the only difference being the additinal form of support present in the \emph{revised} family of semantics.
+
+We believe that these results are of great importance to the continuing progress of this field of research, as it opens new possibilities and creates new connections with other semantics. We'll analyse now with some detail several possible paths for future work. 
+
+One of the issues which we speak of in the motivation for this thesis, in page \pageref{sec:motiv}, is the fact that in some cases, some conclusions could be derived from literals which already were undefined. One such example is the following program:
+\begin{align*}
+P=\{
+& a\leftarrow\sim b\\
+& b\leftarrow\sim a\\
+& c\leftarrow a\\
+& c\leftarrow b
+\}
+\end{align*}
+
+It is known that $WFM_{P} = rWFM_{P} = \langle\{\},\{a,b,c\}\rangle$. However, independently of $a$ and $b$ being undefined, one could argue that this value of undefinedness should not propagate to $c$ and that it is impossible for $c$ to ever false in any world. Therefore it should be true in the WFM. 
+
+The definition of the reasoning behind this result is of interest when comparing it with the rWFS and the WFS. Apparently a skepticalness ordering could be defined here, where the WFS, being the most skeptical, would also be the least expressive. Then, in terms of skepticalness would come the rWFS and then this semantics (should it be defined). Under this new semantics the only literals to have the value of undefined would be those present in choices and undefinedness would not necessarilly propagate itself.
+
+Still with respect to other three-valued formalisms would be the relation between the WFS, the rWFS and the O-Semantics\cite{oSemantics}. The O-Semantics is defined as an enlargement of the \wfs which gives meaning to
+the adding of Closed World Assumptions to further add some conclusions to the \wfs. Consider the following program:
+\begin{align*}
+P=\{
+& a\leftarrow\sim a\\
+& c\leftarrow\sim a
+\}
+\end{align*}
+
+Under the WFS, nothing is true and everything is undefined. Under the rWFS, $a$ is true and therefore $c$ is false. Under the O-Semantics, the authors claim that $c$ should be false because $\sim a$ will never be true in any model of $P$. However, they allow $a$ to remain undefined. It's easy to see that the O-Semantics is somewhat in between the WFS and the rWFS in terms of skepticalness, and so a formal study of this relation is not only important as it is relevant in integrating the rWFS even more in the context of three-valued formalisms.
+
+Still regarding three-valued formalisms, the extension of the rWFS into its extended counterpart (rWFSX) is also a relevant issue. This would allow the definition of the relation of the principle of RAA with a second form of negation.
+
+On a more theoretical side is the study of the relation of the rWFS and the rSMs with \nmr formalisms. Being the principle of \raa a principle so extensivelly used in common sense reasoning as well as in formal reasoning it is interesting to see how it relates to NMR formalisms. The study of whether or not a close relation between the rWFS and NMR formalisms exists would be a consolidating result for this semantics. It might even generate new results for the relation between the WFS and the rWFS, as well as provide a broader study of the application of the RAA principle.
+
+Another study that is missing is a thorough complexity study. In the previous chapter we provided a small account on the complexity of calculating the \rwfm based on the \gro. However more complexity issues are to be analized and this study is an important one. Still regarding complexity issues, there is also the need to study the gain associated with using the \rwfs to simplify the calculation of the \rsms by first calculating the \rwfm and then only using the \rsms to calculate the undefined literals. This would not only be an important implementation work but also relevant in finding out what were the associated gains when using this strategy.
+
+Finally, it would be important to study a more exhaustive definition of all this family of semantics, without ever recurring to operational concepts like loops, and keeping the tradition in this field, by only stating the principles it should obey. Part of this has already been accomplished by the definition of the RAA rule extension property, which adds a rule which states the RAA reasoning behind RAA patterns. However a purelly declarative definition of all these semantics is a hard task because part of the principle we are using here is inherently operational.
+
+So far we have succeeded in applying this principle to a two-valued semantics, capable of extending the \sms, and to a three-valued semantics, capable of extending the \wfs. This last extension provided a way of viewing a given situation skeptically, while still making use of the principle of \raa to derive conclusions.
+
+Even the strange rules employed by Anthony Kiedis of the Red Hot Chilli Peppers in \cite{californication}, should they need to make use of support by absurdity, are now formally defined under the \RWFS.
+
+\incrementmtc
+

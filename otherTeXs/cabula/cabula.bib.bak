@@ -1,0 +1,182 @@
+This file was created with JabRef 1.8.1.
+Encoding: MacRoman
+
+@INPROCEEDINGS{wfsdMain,
+  author = {Jo‹o Alc\{a}ntara and Carlos Viegas Dam\'{a}sio and Lu’s Moniz Pereira},
+  title = {A Well-Founded Semantics with Disjunction},
+  booktitle = {Procs. 21st Intl.Conf. on Logic Programming (ICLP '05)},
+  year = {2005},
+  editor = {M. Gabbrielli, G. Gupta},
+  series = {LNCS},
+  pages = {341 355},
+  month = {October},
+  publisher = {Springer},
+  owner = {luis},
+  timestamp = {2005.11.11},
+}
+
+@INPROCEEDINGS{evolp01,
+  author = {J. J. Alferes and A. Brogi and J. A. Leite and L. M. Pereira},
+  title = {Logic Programming for Evolving Agents.},
+  booktitle = {CIA'03},
+  year = {2003},
+  volume = {2782},
+  series = {LNCS},
+  pages = {281-297},
+  publisher = {Springer},
+}
+
+@INPROCEEDINGS{evolpOriginal,
+  author = {J. J. Alferes and A. Brogi and J. A. Leite and L. M. Pereira},
+  title = {Evolving Logic Programs},
+  booktitle = {JELIA'02},
+  year = {2002},
+  volume = {2424},
+  series = {LNAI},
+  publisher = {Springer},
+}
+
+@ARTICLE{dlpOriginal,
+  author = {J. J. Alferes and J. A. Leite and L. M. Pereira and H. Przymusinska
+	and T. Przymusinski},
+  title = {Dynamic Updates of Non-Monotonic Knowledge Bases},
+  journal = {Journal of Logic Programming},
+  year = {2000},
+  volume = {45},
+  number = {1-3},
+}
+
+@ARTICLE{lups01,
+  author = {J. J. Alferes and L. M. Pereira and H. Przymusinska and T. Przymusinski},
+  title = {LUPS : A Language for Updating Logic Programs},
+  journal = {Artificial Intelligence},
+  year = {2002},
+  volume = {138},
+  number = {1-2},
+}
+
+@INPROCEEDINGS{mulaACM,
+  author = {Miguel Boavida and Jo\~{a}o Paulo Santos and Pedro Assun\c{c}\~{a}o
+	and Lu\'{i}s Soares and Jo\~{a}o Luz and Ricardo Viegas},
+  title = {The MulE Game Engine - Extending Online Role-Playing Games},
+  booktitle = {ITiCSE '05: Proceedings of the 10th annual SIGCSE conference on Innovation
+	and technology in computer science education},
+  year = {2005},
+  pages = {404--404},
+  address = {New York, NY, USA},
+  publisher = {ACM Press},
+  doi = {10.1145/1067445.1067608},
+  isbn = {1-59593-024-8},
+  location = {Caparica, Portugal},
+}
+
+@UNPUBLISHED{mulaOriginal,
+  author = {Miguel Boavida and Jo\~{a}o Paulo Santos and Pedro Assun\c{c}\~{a}o
+	and Lu\'{i}s Soares and Jo\~{a}o Luz and Ricardo Viegas},
+  title = {MulE Game Engine, An approach to realistic multiplayer gaming},
+  note = {Poster presentation at the Level Up Conference 2003, Utrecht, The
+	Netherlands},
+  month = {November},
+  year = {2003},
+}
+
+@MISC{xasp,
+  author = {Lu\'{i}s Castro and Terrance Swift and David S. Warren},
+  title = {{XASP} -- {Answer} {Set} {Programming} with {XSB} and {Smodels}},
+  year = {2002},
+  note = {Consult at \url{http://xsb.sourceforge.net/manual2/node154.html}},
+  owner = {luis},
+  pdf = {http://xsb.sourceforge.net/packages/xasp.pdf},
+  timestamp = {2005.11.04},
+  url = {http://xsb.sourceforge.net/manual2/node154.html},
+}
+
+@ARTICLE{wfsFixpoint,
+  author = {A. van Gelder},
+  title = {The Alternating Fixpoint of Logic Programs with Negation},
+  journal = {Journal of computer and system sciences},
+  year = {1993},
+  volume = {47},
+  pages = {185 221},
+  owner = {luis},
+  timestamp = {2005.11.11},
+}
+
+@ARTICLE{wfs,
+  author = {A. Van Gelder and K. A. Ross and J. S. Schlipf},
+  title = {The well-founded semantics for general logic programs},
+  journal = {Journal of the ACM},
+  year = {1991},
+  volume = {38},
+  pages = {620 650},
+  owner = {luis},
+  timestamp = {2005.11.11},
+}
+
+@INPROCEEDINGS{sm,
+  author = {M. Gelfond and V. Lifschitz},
+  title = {The stable semantics for logic programs},
+  booktitle = {ICLP'88},
+  year = {1988},
+  publisher = {MIT Press},
+}
+
+@BOOK{jlBook,
+  title = {Evolving Knowledge Bases},
+  publisher = {IOS Press},
+  year = {2003},
+  author = {J. A. Leite},
+}
+
+@INPROCEEDINGS{smodels,
+  author = {I. Niemel{\"a} and P. Simons},
+  title = {Smodels: An implementation of the stable and well-founded semantics
+	for normal {LP}},
+  booktitle = {Proceedings of the 4th International Conference on Logic Programming
+	and Nonmonotonic Reasoning},
+  year = {1997},
+  volume = {1265},
+  series = {Lecture Notes in Artificial Intelligence},
+  pages = {420-429},
+  address = {Dagstuhl, Germany},
+  month = {July},
+  publisher = {Springer},
+}
+
+@INPROCEEDINGS{rsmMain,
+  author = {Lu’s Moniz Pereira and Alexandre Miguel Pinto},
+  title = {Revised Stable Models - a Semantics for Logic Programs},
+  booktitle = {Progress in Artificial Intelligence, 
+	
+	Procs. 12th Portuguese Intl.Conf. on Artificial Intelligence (EPIA'05)},
+  year = {2005},
+  editor = {C. Bento and A. Cardoso and G. Dias},
+  series = {LNAI},
+  month = {December},
+  publisher = {Springer},
+  owner = {luis},
+  timestamp = {2005.11.11},
+}
+
+@INBOOK{wfsPrzy,
+  pages = {321-367},
+  title = {Semantic Issues in Deductive Databases and Logic Programs},
+  publisher = {North-Holland},
+  year = {1990},
+  editor = {R. B. Banerji},
+  author = {H. Przymusinska and T. Przymusinski},
+  address = {Amsterdam},
+  booktitle = {Formal Techniques in Artificial Intelligence: A Sourcebook},
+}
+
+@MISC{xsb,
+  author = {{Computer Science Department of the Stony Brook University} and {Katholieke
+	Universiteit Leuven} and {Universidade Nova de Lisboa} and {Uppsala
+	Universitet} and {XSB, Inc.}},
+  title = {The {XSB Logic Programming System}, version 2.7.1},
+  month = {March},
+  year = {2005},
+  note = {Consult at \url{http://xsb.sourceforge.net/}},
+  url = {http://xsb.sourceforge.net/},
+}
+

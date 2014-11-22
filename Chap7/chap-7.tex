@@ -1,0 +1,262 @@
+%%#################################################################
+%% CHAPTER 7.
+%%#################################################################
+\chapter{Examples of Calculation of the rWFS and the rSMs}
+\label{ap:examples}
+
+\begin{ChapAbstract}
+Where we show the results of the calculation of the \rsms and the \rwfm of several programs by the implementation discussed in the next appendix.
+\end{ChapAbstract}
+
+\section{Calculation Examples of rWFS and the rSMs}
+Here we present some calculation examples of programs with and without RAA patterns as provided by the implementation presented in the next chapter. These results are already treated to improve readability and all \cf auxiliary literals were removed.
+
+
+\subsection{Program 1}
+\begin{align*}
+P=\{
+& a\leftarrow x\\
+& x\leftarrow y\\
+& y\leftarrow \sim a\\
+& y\leftarrow \sim b
+\}\\
+\\
+& rSM_{1}=\{a,x,y\}\\
+& rWFM=\langle\{a,x,y\},\{a,x,y\}\rangle
+\end{align*}
+
+
+\subsection{Program 2}
+\begin{align*}
+P=\{
+& a\leftarrow x,y\\
+& x\leftarrow z\\
+& z\leftarrow \sim a\\
+& y\leftarrow w\\
+& w\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a\}\\
+& rWFM=\langle\{a\},\{a\}\rangle\end{align*}
+
+\subsection{Program 3}
+\begin{align*}
+P=\{
+& a\leftarrow x\\
+& x\leftarrow \sim a, y\\
+& y\leftarrow \sim b\\
+& b\leftarrow z\\
+& z\leftarrow \sim b, w\\
+& w\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a,y\}\\
+& rSM_{2}=\{b,w\}\\
+& rWFM=\langle\{\},\{a,y,b,w,x,z\}\rangle
+\end{align*}
+
+\subsection{Program 4}
+\begin{align*}
+P=\{
+& a\leftarrow \sim a\\
+& b\leftarrow \sim a, \sim b
+\}\\
+\\
+& rSM_{1}=\{a\}\\
+& rWFM=\langle\{a\},\{a\}\rangle\end{align*}
+
+\subsection{Program 5}
+\begin{align*}
+P=\{
+& a\leftarrow \sim b,\sim c\\
+& b\leftarrow \sim a,\sim c\\
+& c\leftarrow \sim a,\sim b
+\}\\
+\\
+& rSM_{1}=\{a\}\\
+& rSM_{2}=\{b\}\\
+& rSM_{3}=\{c\}\\
+& rWFM=\langle\{\},\{a,b,c\}\rangle\end{align*}
+
+\subsection{Program 6}
+\begin{align*}
+P=\{
+& a\leftarrow \sim b\\
+& b\leftarrow \sim c,x\\
+& c\leftarrow \sim a\\
+& x\leftarrow \sim x,a
+\}\\
+\\
+& rSM_{1}=\{a,b,x\}\\
+& rSM_{2}=\{b,c\}\\
+& rSM_{3}=\{c,a,x\}\\
+& rWFM=\langle\{\},\{a,b,c,x\}\rangle\end{align*}
+
+\subsection{Program 7}
+\begin{align*}
+P=\{
+& a\leftarrow x\\
+& x\leftarrow \sim a\\
+& b\leftarrow \sim a\\
+& c\leftarrow \sim b\\
+& d\leftarrow \sim c
+\}\\
+\\
+& rSM_{1}=\{a,c\}\\
+& rWFM=\langle\{a,c\},\{a,c\}\rangle\end{align*}
+
+\subsection{Program 8}
+\begin{align*}
+P=\{
+& b\leftarrow y\\
+& y\leftarrow \sim a, c\\
+& c\leftarrow a\\
+& a\leftarrow x\\
+& x\leftarrow \sim b
+\}\\
+\\
+& rSM_{1}=\{b\}\\
+& rSM_{2}=\{a,c,x\}\\
+& rWFM=\langle\{\},\{b,a,c,x,y\}\rangle\end{align*}
+
+\subsection{Program 9}
+\begin{align*}
+P=\{
+& a\leftarrow x\\
+& x\leftarrow y\\
+& y\leftarrow \sim a\\
+& y\leftarrow \sim x
+\}\\
+\\
+& rSM_{1}=\{a,x\}\\
+& rWFM=\langle\{a,x\},\{a,x\}\rangle\end{align*}
+
+\subsection{Program 10}
+\begin{align*}
+P=\{
+& a\leftarrow \sim b\\
+& b\leftarrow \sim a\\
+& c\leftarrow a,\sim c\\
+& x\leftarrow \sim y\\
+& y\leftarrow \sim x\\
+& z\leftarrow x,\sim z
+\}\\
+\\
+& rSM_{1}=\{b,y\}\\
+& rSM_{2}=\{b,x,z\}\\
+& rSM_{3}=\{a,c,y\}\\
+& rSM_{4}=\{a,c,x,z\}\\
+& rWFM=\langle\{\},\{a,c,x,z,b,y\}\rangle\end{align*}
+
+\subsection{Program 11}
+\begin{align*}
+P=\{
+& a\leftarrow x\\
+& x\leftarrow y, \sim x\\
+& y\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a\}\\
+& rWFM=\langle\{a\},\{a\}\rangle\end{align*}
+
+\subsection{Program 12}
+\begin{align*}
+P=\{
+& a\leftarrow x\\
+& x\leftarrow y, \sim a\\
+& y\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a\}\\
+& rWFM=\langle\{a\},\{a\}\rangle\end{align*}
+
+\subsection{Program 13}
+\begin{align*}
+P=\{
+& c\leftarrow a,\sim c\\
+& a\leftarrow \sim b\\
+& b\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a,c\}\\
+& rSM_{2}=\{b\}\\
+& rWFM=\langle\{\},\{a,c,b\}\rangle\end{align*}
+
+\subsection{Program 14}
+\begin{align*}
+P=\{
+& a\leftarrow \sim b,\sim a\\
+& b\leftarrow \sim a, \sim b
+\}\\
+\\
+& rSM_{1}=\{a\}\\
+& rSM_{2}=\{b\}\\
+& rWFM=\langle\{\},\{a,b\}\rangle\end{align*}
+
+\subsection{Program 15}
+\begin{align*}
+P=\{
+& a\leftarrow \sim b\\
+& b\leftarrow \sim c\\
+& c\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a,b\}\\
+& rSM_{2}=\{b,c\}\\
+& rSM_{3}=\{c,a\}\\
+& rWFM=\langle\{\},\{a,b,c\}\rangle\end{align*}
+
+\subsection{Program 16}
+\begin{align*}
+P=\{
+& a\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a\}\\
+& rWFM=\langle\{a\},\{a\}\rangle\end{align*}
+
+\subsection{Program 17}
+\begin{align*}
+P=\{
+& a\leftarrow \sim a\\
+& b\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a\}\\
+& rWFM=\langle\{a\},\{a\}\rangle\end{align*}
+
+\subsection{Program 18}
+\begin{align*}
+P=\{
+& a\leftarrow b,x\\
+& b\leftarrow \sim b\\
+& x\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a,b\}\\
+& rWFM=\langle\{a,b\},\{a,b\}\rangle\end{align*}
+
+\subsection{Program 19}
+\begin{align*}
+P=\{
+& a\leftarrow \sim a, \sim b\\
+& b\leftarrow \sim b, d\\
+& d\leftarrow \sim a
+\}\\
+\\
+& rSM_{1}=\{a\}\\
+& rSM_{2}=\{b,d\}\\
+& rWFM=\langle\{\},\{a,b,d\}\rangle\end{align*}
+
+\subsection{Program 20}
+\begin{align*}
+P=\{
+& y\leftarrow \sim a\\
+& a\leftarrow \sim b\\
+& b\leftarrow \sim c
+\}\\
+\\
+& rSM_{1}=\{y,b\}\\
+& rWFM=\langle\{y,b\},\{y,b\}\rangle
+\end{align*}
+

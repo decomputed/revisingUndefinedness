@@ -1,0 +1,572 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{amssymb}
+\usepackage{xspace}
+\usepackage{amsmath}
+
+
+\setlength{
+\parskip}{5mm}
+\setlength{
+\parindent}{0mm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}[theorem]{Definition}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   document starts here
+%
+
+\begin{document}
+
+\title{Some thoughts on a fixed point operator \\
+for rSM and rWFS}
+\author{Luís Rodrigues Soares}
+\date{November 29th, 2005}
+
+
+
+\maketitle
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Intro}
+My first attempts with the definition of a fixed point for rSM (and hence for rWFS) were very naive as all I tried to do was check for the intersections of interpretations and the application of $\Gamma$ operator on those interpretations, to see where did I get the models. I took me only a week to realize this wasn't a good approach because it only worked on small programs (although it \emph{did} work for small programs\ldots).
+
+So the next approach, and the best one so far, was to try to look for the \emph{essence} of a RAA so that the operator (which I named $\Gamma ^r$) could preprocess the logic program on some way, and after that the $\Gamma$ operator could be used. If this resulted well, it might be possible to give the same use to $\Gamma ^r$ as it is given to $\Gamma$ for the SMs and on the WFS.
+
+I now start by showing the reasoning I followed, and then present some examples, good ones (that work) and bad ones (that \emph{still} don't work). I end up with some ideas for the bad examples.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Searching for the essence of a RAA}
+As I stated before, my idea was to do some sort of preprocessing to the logic program so that when I applied the $\Gamma$ operator it would not remove the rules belonging to RAAs. So for example, for program $P_{1}$, what would be $P_{r1}$?
+
+\[P_1  = \left\{ {a \leftarrow \sim a} \right\}\]
+
+\[
+P_{r1}  = \left\{ \begin{array}{l}
+ a \leftarrow \sim a \\ 
+ a \leftarrow  \\ 
+ \end{array} \right\}
+\]
+
+If I now applied $\Gamma _{P_{r1} } \left( \{a\} \right)$ I would get $a$, the fixed point I initially intended to get.
+
+I also used this idea on the following:
+
+\[
+P_2  = \left\{ \begin{array}{l}
+ a \leftarrow \sim b \\ 
+ b \leftarrow \sim c \\ 
+ c \leftarrow \sim a \\ 
+ \end{array} \right\}
+\]
+
+which has three models, $M_1  = \left\{ {a,b} \right\}$, $M_2  = \left\{ {b,c} \right\}$ and $M_3  = \left\{ {c,a} \right\}$. So if we were trying to test for $M_1$, it would suffice to have the following program before applying $\Gamma _{P_{r2} }(\{a,b\})$:
+
+\[
+P_{r2}  = \left\{ \begin{array}{l}
+ a \leftarrow \sim b \\ 
+ b \leftarrow \sim c \\ 
+ c \leftarrow \sim a \\ 
+ a \leftarrow  \\ 
+ \end{array} \right\}
+\]
+
+
+And equivalently to 
+
+\[
+P_3  = \left\{ \begin{array}{l}
+ a \leftarrow x \\ 
+ x \leftarrow \sim a \\ 
+ \end{array} \right\}
+\]
+
+and
+
+\[
+P_{r3}  = \left\{ \begin{array}{l}
+ a \leftarrow x \\ 
+ x \leftarrow \sim a \\ 
+ a \leftarrow  \\ 
+ \end{array} \right\}
+\]
+
+
+where $\Gamma _{P_{r3} } \left( a \right)$ I would give me $a$, the fixed point I initially intended to get.
+
+These observations eventually got me to the following definition:
+
+\begin{definition}[$\Gamma ^r$ Operator]
+Let $P$ be a NLP and $I$ an interpretation.
+
+$P_r$ is the logic program obtained by performing the following operation on $P$:
+
+\begin{itemize}
+	\item For each literal $X \in I$, if there is a rule $H \leftarrow A_1 , \ldots ,A_m ,\sim B_1 , \ldots ,\sim B_n $ such that $X \in \left\{ {B_1 , \ldots ,B_n } \right\}$ and $H \notin I\backslash \left\{ X \right\}$, add to P the rule $X \leftarrow A_1 , \ldots ,A_m, \sim B_1 , \ldots ,\sim B_k$, with $\{B_1,\ldots,B_k\} = \{ B_1 , \ldots ,B_n \}\backslash\{X\}$.
+	\item No other rule is to be added to $P_r$.
+\end{itemize}
+
+On program $P_r$ apply $\Gamma \left( I \right)$ operator.
+\end{definition}
+
+
+\begin{definition}[$\Gamma ^r$-based rSM definition]
+Given any 2-valued interpretation $I$ and a NLP $P$, $I$ is a rSM of $P$ if and only if $I = \Gamma ^r \left( I \right) $
+\end{definition}
+
+
+\begin{definition}[$\Gamma ^r$-based rWFS definition]
+Given a NLP $P$, the rWFM of P is the tuple $\left\langle {T,TU} \right\rangle$ where $T$ is the least fixed point of ${\Gamma ^r}^2 $, starting with the empty interpretation, and $TU$ is the next iteration of ${\Gamma ^r}^2 $, after reaching a fixed point.
+\end{definition}
+
+The intuition here is to add certain literals present in the model to the program. Which ones should we add? Those that are negated in some rule in the program and the head of that rule does not belong to the rest of the model (i.e., the model except the literal we are considering). This means that only either heads equal to the negated literal, either heads not at all present in the model will be considered when adding literals to the program. We'll see in the following section how this behaves with other programs.
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Good examples}
+
+I'll now show the several tested programs with the good results first. I'm not presenting all the steps to all programs as some of them take more time than others. But I believe the idea will be easily grasped.
+
+\subsection{Program 1}
+
+\[
+P_1  = \left\{ \begin{array}{l}
+ a \leftarrow \sim b \\ 
+ b \leftarrow \sim c \\ 
+ c \leftarrow \sim a \\ 
+ \end{array} \right\}
+\]
+
+Starting with the rWFM, we have:
+
+\[
+\displaylines{
+  \Gamma ^{r^2 } \left( {\left\{ {} \right\}} \right) = \Gamma ^r \left( {\Gamma ^r \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\Gamma _{P_{r1} } \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\left\{ {a,b,c} \right\}} \right) =  \cr 
+   = \Gamma _{P_{r2} } \left( {\left\{ {a,b,c} \right\}} \right) = \left\{ {} \right\} \cr}
+\]
+
+where $P_{r1}  = P \cup \left\{ {} \right\}$ because as the initial interpretation is empty, no rule is added to P and $P_{r2}  = P \cup \left\{ {} \right\}$ because all heads belong to the model except the tested literal. Therefore no literal is ever added. We reach a fixed point with the first iteration of $\Gamma ^{r^2 }$ and the next iteration will give us the set ${\left\{ {a,b,c} \right\}}$ which allows us to say that $rWFM\left( {P_1 } \right) = \left\langle {\left\{ {} \right\},\left\{ {a,b,c} \right\}} \right\rangle $, which is correct according to what we know from the rSMs of this program. Let's now test if $rSM_1  = \left( {\left\{ {a,b} \right\}} \right)$.
+
+\[
+\Gamma ^r \left( {\left\{ {a,b} \right\}} \right) = \Gamma _{P_r } \left( {\left\{ {a,b} \right\}} \right) = \left\{ {a,b} \right\}
+\]
+
+with $P_r  = P \cup \left\{ {a \leftarrow } \right\}$. This would give the equivalent results to $rSM_2  = \left( {\left\{ {b,c} \right\}} \right)$ and $rSM_3  = \left( {\left\{ {c,a} \right\}} \right)$.
+
+
+\subsection{Program 2}
+
+Program 2 is an enhanced version of program 1:
+
+\[
+P_2  = \left\{ \begin{array}{l}
+ a \leftarrow \sim b,x \\ 
+ b \leftarrow \sim c,x \\ 
+ c \leftarrow \sim a \\ 
+ x \leftarrow \sim x \\ 
+ y \leftarrow d,\sim y \\ 
+ \end{array} \right\}
+\]
+
+Let's start by calculating the $rWFM\left( {P_2 } \right)$:
+
+First iteration of ${\Gamma ^r} ^2 $:
+
+\[
+\displaylines{
+  {\Gamma ^r} ^2 \left( {\left\{ {} \right\}} \right) = \Gamma ^r \left( {\Gamma ^r \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\Gamma \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\left\{ {a,c,x} \right\}} \right) =  \cr 
+   = \Gamma _{P_{r1} } \left( {\left\{ {a,c,x} \right\}} \right) = \left\{ {a,x} \right\} \cr}
+\]
+
+with
+
+
+\[
+P_{r1}  =P \cup  \left\{ \begin{array}{l}
+ c \leftarrow y \\ 
+ x \leftarrow  \\ 
+ \end{array} \right\}
+\]
+
+
+As we still haven't reached a fixed point, we try the next iteration:
+
+\[
+\displaylines{
+  {\Gamma ^r} ^2 \left( {\left\{ {a,x} \right\}} \right) = \Gamma ^r \left( {\Gamma ^r \left( {\left\{ {a,x} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\Gamma _{P_{r2} } \left( {\left\{ {a,x} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\left\{ {a,x} \right\}} \right) = \left\{ {a,x} \right\} \cr}
+\]
+
+\[
+P_{r2}  = P \cup  \left\{ \begin{array}{l}
+ a \leftarrow  \\ 
+ x \leftarrow  \\ 
+ \end{array} \right\}
+\]
+
+
+As we reached a fixed point we can conclude $rWFM\left( {P_2 } \right) = \left\langle {\left\{ {a,x} \right\},\left\{ {a,x} \right\}} \right\rangle $
+
+Let's now check if this is really a rSM of $P_2$:
+
+\[
+\Gamma ^r \left( {\left\{ {a,x} \right\}} \right) = \Gamma _{P_{r3} } \left( {\left\{ {a,x} \right\}} \right) = \left\{ {a,x} \right\}
+\]
+
+with
+
+\[
+P_{r3}  = P \cup  \left\{ \begin{array}{l}
+ a \leftarrow  \\ 
+ x \leftarrow  \\ 
+ \end{array} \right\}
+\]
+
+Apparently all went ok. Let's now check to see if other interpretations are models of $P_2$, as they shouldn't be.
+
+Starting with $I = \left( {\left\{ {a,c,x} \right\}} \right)$, we get:
+
+\[
+\Gamma ^r \left( {\left\{ {a,c,x} \right\}} \right) = \Gamma _{P_{r4} } \left( {\left\{ {a,c,x} \right\}} \right) = \left\{ {a,x} \right\}
+\]
+
+with
+
+\[
+P_{r4}  = P \cup \left\{ \begin{array}{l}
+ c \leftarrow y \\ 
+ x \leftarrow  \\ 
+ \end{array} \right\}
+\]
+
+
+Now, for $I = \left( {\left\{ {c,x} \right\}} \right)$ we get:
+
+\[
+\Gamma ^r \left( {\left\{ {c,x} \right\}} \right) = \Gamma _{P_{r5} } \left( {\left\{ {a,c,x} \right\}} \right) = \left\{ {c,a,x} \right\}
+\]
+
+with
+
+\[
+P_{r5}  = P \cup \left\{ \begin{array}{l}
+ c \leftarrow y \\ 
+ x \leftarrow  \\ 
+ \end{array} \right\}
+\]
+
+
+\subsection{Program 3}
+
+\[
+P_3  = \left\{ \begin{array}{l}
+ a \leftarrow \sim b,\sim a \\ 
+ b \leftarrow \sim a,\sim b \\ 
+ \end{array} \right\}
+\]
+
+If we start by calculating the $rWFM(P_3)$ we get:
+
+\[
+\displaylines{
+  \Gamma ^{r^2 } \left( {\left\{ {} \right\}} \right) = \Gamma ^r \left( {\Gamma ^r \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\Gamma \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\left\{ {a,b} \right\}} \right) =  \cr 
+   = \Gamma _{P_{r1} } \left( {\left\{ {a,b} \right\}} \right) =  \cr 
+   = \left\{ {} \right\} \cr}
+\]
+
+with 
+
+\[
+P_{r1}  = P \cup \left\{ \begin{array}{l}
+ a \leftarrow \sim b \\ 
+ b \leftarrow \sim a \\ 
+ \end{array} \right\}
+\]
+
+which results in $ rWFM\left( {P_2 } \right) = \left\langle {\left\{ {} \right\},\left\{ {a,b} \right\}} \right\rangle $. This result suggests that there are two rSMs, $\{a\}$ and $\{b\}$. Let's test to see if this is the case:
+
+\[
+\Gamma ^r \left( {\left\{ a \right\}} \right) = \Gamma _{P_{r2} } \left( {\left\{ a \right\}} \right) = \left\{ a \right\}
+\]
+
+with 
+
+\[
+P_{r2}  = P \cup \left\{ {a \leftarrow \sim b} \right\}
+\]
+
+and
+
+\[
+\Gamma ^r \left( {\left\{ b \right\}} \right) = \Gamma _{P_{r3} } \left( {\left\{ b \right\}} \right) = \left\{ b \right\}
+\]
+
+with
+
+\[
+P_{r3}  = P \cup \left\{ {b \leftarrow \sim a} \right\}
+\]
+
+
+\subsection{Program 4}
+
+Another program I tested was the following:
+
+\[
+P_4  = \left\{ \begin{array}{l}
+ a \leftarrow \sim b \\ 
+ b \leftarrow \sim a \\ 
+ c \leftarrow a,d,\sim c \\ 
+ e \leftarrow f \\ 
+ g \leftarrow \sim h \\ 
+ i \leftarrow d,\sim i \\ 
+ d \leftarrow \sim d \\ 
+ \end{array} \right\}
+\]
+
+Starting with the $rWFM\left( {P_4 } \right)$, we have the first iteration of $\Gamma ^{r^2 }$
+
+\[
+\displaylines{
+  \Gamma ^{r^2 } \left( {\left\{ {} \right\}} \right) = \Gamma ^r \left( {\Gamma ^r \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\Gamma \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\left\{ {a,b,c,d,g,i} \right\}} \right) =  \cr 
+   = \Gamma _{P_{r1} } \left( {\left\{ {a,b,c,d,g,i} \right\}} \right) =  \cr 
+   = \left\{ {g,d,i} \right\} \cr}
+\]
+
+with
+
+\[
+P_{r1}  = P \cup \left\{ \begin{array}{l}
+ c \leftarrow a,d \\ 
+ d \leftarrow  \\ 
+ i \leftarrow d \\ 
+ \end{array} \right\}
+\]
+
+and the second one,
+
+\[
+\displaylines{
+  \Gamma ^{r^2 } \left( {\left\{ {g,d,i} \right\}} \right) = \Gamma ^r \left( {\Gamma ^r \left( {\left\{ {g,d,i} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\Gamma _{P_{r2} } \left( {\left\{ {g,d,i} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\left\{ {a,b,c,d,g,i} \right\}} \right) =  \cr 
+   = \left\{ {g,d,i} \right\} \cr}
+\]
+
+with
+
+\[
+P_{r2}  = P \cup \left\{ \begin{array}{l}
+ i \leftarrow d \\ 
+ d \leftarrow  \\ 
+ \end{array} \right\}
+\]
+
+As a result we get $rWFM\left( {P_4 } \right) = \left\langle {\left\{ {g,d,i} \right\},\left\{ {a,b,c,d,g,i} \right\}} \right\rangle $.
+
+
+Let's now test for $rSM_1  = \left\{ {a,c,d,g,i} \right\}$ and $rSM_2  = \left\{ {b,d,g,i} \right\}$:
+
+\[
+\Gamma ^r \left( {\left\{ {a,c,d,g,i} \right\}} \right) = \Gamma _{P_{r3} } \left( {\left\{ {a,c,d,g,i} \right\}} \right) = \left\{ {a,c,d,g,i} \right\}
+\]
+
+with 
+
+\[
+P_{r3}  = P \cup \left\{ \begin{array}{l}
+ a \leftarrow  \\ 
+ c \leftarrow a,d \\ 
+ d \leftarrow  \\ 
+ i \leftarrow d \\ 
+ \end{array} \right\}
+\]
+
+and
+
+\[
+\Gamma ^r \left( {\left\{ {b,d,g,i} \right\}} \right) = \Gamma _{P_{r4} } \left( {\left\{ {b,d,g,i} \right\}} \right) = \left\{ {b,d,g,i} \right\}
+\]
+
+with
+
+\[
+P_{r4}  = P \cup \left\{ \begin{array}{l}
+ b \leftarrow  \\ 
+ d \leftarrow  \\ 
+ i \leftarrow d \\ 
+ \end{array} \right\}
+\]
+
+
+\subsection{Program 5}
+
+Finally, here's the last program I tried:
+
+\[
+P_5  = \left\{ \begin{array}{l}
+ p\left( X \right) \leftarrow p\left( {s\left( X \right)} \right) \\ 
+ p\left( X \right) \leftarrow \sim p\left( {s\left( X \right)} \right) \\ 
+ \end{array} \right\}
+\]
+
+We start with the first iteration $\Gamma ^{r^2 }$, assuming the grounding $X = 0$:
+
+\[
+\displaylines{
+  \Gamma ^{r^2 } \left( {\left\{ {} \right\}} \right) = \Gamma ^r \left( {\Gamma ^r \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\Gamma \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\left\{ {p\left( 0 \right)} \right\}} \right) =  \cr 
+   = \Gamma _{P_{r1} } \left( {\left\{ {p\left( 0 \right)} \right\}} \right) =  \cr 
+   = \left\{ {p\left( 0 \right)} \right\} \cr}
+\]
+
+where
+
+\[
+P_{r1}  = P \cup \left\{ {} \right\}
+\]
+
+and then the second iteration,
+
+\[
+\displaylines{
+  \Gamma ^{r^2 } \left( {\left\{ {p\left( 0 \right)} \right\}} \right) = \Gamma ^r \left( {\Gamma ^r \left( {\left\{ {p\left( 0 \right)} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {p\left( 0 \right)} \right) =  \cr 
+   = \left\{ {p\left( 0 \right)} \right\} \cr}
+\]
+
+leaving us with $rWFM\left( {P_5 } \right) = \left\langle {\left\{ {p\left( X \right)} \right\},\left\{ {p\left( X \right)} \right\}} \right\rangle $.
+
+If we try $rSM = \left\{ {p(0)} \right\}$, as we already seen from the $rWFM$ it will give a fixed point on $p(0)$. Just to be sure, let's try $rSM = \left\{ {p\left( {s\left( 0 \right)} \right)} \right\}$ and $rSM = \left\{ {p\left( {s\left( 0 \right)} \right),p\left( 0 \right)} \right\}$:
+
+\[
+\Gamma ^r \left( {\left\{ {p\left( {s\left( 0 \right)} \right)} \right\}} \right) = \Gamma _{P_{r2} } \left( {\left\{ {p\left( {s\left( 0 \right)} \right)} \right\}} \right) = \left\{ {p\left( {s\left( 0 \right)} \right),p\left( 0 \right)} \right\}
+\]
+
+with 
+
+\[
+P_{r2}  = P \cup \left\{ {p\left( {s\left( 0 \right)} \right)} \right\}
+\]
+
+and
+
+\[
+\Gamma ^r \left( {\left\{ {p\left( {s\left( 0 \right)} \right),p\left( 0 \right)} \right\}} \right) = \Gamma _{P_{r3}} \left( {\left\{ {p\left( {s\left( 0 \right)} \right),p\left( 0 \right)} \right\}} \right) = \left\{ {} \right\}
+\]
+
+with
+
+\[
+P_{r3}  = P \cup \left\{ {} \right\}
+\]
+
+
+As no fixed point is reached those are not rSMs of $P_5$. We'll see in the next section the problems encountered so far.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bad example and some ideas}
+
+Let P be the following program:
+
+\[
+P = \left\{ \begin{array}{l}
+ a \leftarrow x \\ 
+ x \leftarrow \sim a \\ 
+ \end{array} \right\}
+\]
+
+If we try $rSM_P  = \left\{ a \right\}$ we get:
+
+\[
+\Gamma ^r \left( {\left\{ a \right\}} \right) = \Gamma _{P_r } \left( {\left\{ a \right\}} \right) = \left\{ a \right\}
+\]
+
+with
+
+\[
+P_r  = P \cup \left\{ {a \leftarrow } \right\}
+\]
+
+This is easy to see because $x \leftarrow \sim a$ is the only rule where $a$ appears negated and $x \notin \{a\}\backslash\{a\}$. So we add $a \leftarrow$ to $P$ and apply $\Gamma$ operator. Let's now see what happens if we try to calculate $rWFM\left( P \right)$:
+
+\[
+\displaylines{
+  \Gamma ^{r^2 } \left( {\left\{ {} \right\}} \right) = \Gamma ^r \left( {\Gamma ^r \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\Gamma \left( {\left\{ {} \right\}} \right)} \right) =  \cr 
+   = \Gamma ^r \left( {\left\{ {a,x} \right\}} \right) =  \cr 
+   = \Gamma _{P_{r1} } \left( {\left\{ {a,x} \right\}} \right) =  \cr 
+   = \left\{ {} \right\} \cr}
+\]
+
+where
+
+\[
+P_{r1}  = P \cup \left\{ {} \right\}
+\]
+
+
+which would give us $rWFM\left( P \right) = \left\langle {\left\{ {} \right\},\left\{ {a,x} \right\}} \right\rangle $. This is obviously wrong and goes against the result we got when we calculated the $rSM(P)$. So where is the problem?
+
+When we calculate $\Gamma ^r \left( {\left\{ {a,x} \right\}} \right)$, we seek for rules where either $a$ or $x$ is negated. There is only one and it is $x \leftarrow \sim a$. Now, when $I=\{a,x\}$, and the literal we're testing is $a$, we cannot add $a\leftarrow$ to P because $x\in I\backslash\{a\}$. And that is why we get $\Gamma ^r \left( {\left\{ {a,x} \right\}} \right)=\{\}$.
+
+So where exactly is the problem? Note that we would get the same results if P were
+
+\[
+P = \left\{ \begin{array}{l}
+ a \leftarrow y \\ 
+ y \leftarrow x \\ 
+ x \leftarrow \sim a \\ 
+ \end{array} \right\}
+\]
+
+In fact, whatever number of clauses we add between the first and the last one, if they are in the form $x\leftarrow y$, with $x$ eventually being in the tail of some literal $A$ and $y$ being in the head of some literal $\sim A$, we would always get this problem.
+
+\[
+P = \left\{ \begin{array}{l}
+ a \leftarrow  x  \\ 
+  x  \leftarrow  \ldots  \\ 
+  \ldots  \leftarrow  y  \\ 
+  y  \leftarrow \sim a \\ 
+ \end{array} \right\}
+\]
+
+
+So what was my idea so far? I think the definition is not incorrect. Actually, when we are searching for the head of the rule $x \leftarrow \sim a$, we shouldn't get $x$ but $a$, because $a$ is directly dependent on $x$ ($a\leftarrow x$). So one possible solution would be to preprocess the program, and replace such rules. For example, for $P$, the equivalent program would be $a\leftarrow \sim a$, and its models (rSM and rWFM) would not even differ between the two forms. The problem is that we can have an infinite number of rules in that form between the first and the last rule. And how can we find those rules event if they appear in a finite number?
+
+These are the problems so far\ldots
+
+
+
+
+\end{document}

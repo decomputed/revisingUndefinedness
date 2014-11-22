@@ -1,0 +1,175 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[portuguese]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{amssymb}
+\usepackage{xspace}
+
+\usepackage{abbrev}
+\usepackage{newcoms}
+
+\setlength{
+\parskip}{5mm}
+\setlength{
+\parindent}{0mm}
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%   document starts here
+%%
+
+\begin{document}
+
+\title{Logic programming semantics}
+
+\author{Cheat sheet}
+
+\date{Luís Rodrigues Soares\footnote{luizsoarez@gmail.com}}
+
+
+
+\maketitle
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% abstract
+
+\newpage
+\tableofcontents
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Stable Models Semantics\cite{sm}}
+
+\begin{definition}[\GFo] Let $P$ be a \nlp and $I$ a \twovi. The
+GL-transformation of $P$ modulo $I$ is the  program $\frac{P}{I}$ obtained from
+$P$ by performing the following operations:
+\begin{itemize}
+\item remove from $P$ all rules which contain a default literal $not\ A$ such
+that $A\in I$;
+\item remove from the remaining rules alll default literals.
+\end{itemize}
+
+Fixed points of the \GFo $\Gamma$ for a program $P$ are always models of $P$.
+\end{definition}
+
+\begin{definition}[\SM Semantics] A \twovi $I$ of a \nlp $P$ is a \sm of $P$ if
+and only if $\Gamma(I)=I$. An atom $A$ of $P$ is true under the \sm semantics if
+and only if $A$ belongs to all \sms of $P$.
+\end{definition}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Well-Founded Semantics\cite{wfs}}
+
+\begin{definition}[$\Gamma^{\ast}$ operator] Let $P$ be a \nlp and $I$ a
+\threevi. The extended GL-transformation of $P$ modulo $I$ is the  program
+$\frac{P}{I}$ obtained from $P$ by performing the following operations:
+\begin{itemize}
+\item remove from $P$ all rules which contain a default literal $not\ A$ such
+that $I(A)=1$;
+\item replace in the remaining rules of $P$ those default rules $not\ A$ such
+that $I(A)=\frac{1}{2}$ by the reserved literal \emph{u};
+\item remove from the remaining rules alll default literals.
+\end{itemize}
+
+Since the resulting program is non-negative, it has a unique \threevi least
+model $J$. We define $\Gamma^{\ast}(I)=J$.
+\end{definition}
+
+\begin{definition}[Well-founded semantics] A \threevi $I$ of a \lp $P$ is a
+partial \sm of $P$ if and only if $\Gamma^{\ast}(I)=I$. The well-founded
+semantics of $P$ is determined by the unique $F-least$ partial \sm of $P$, and
+can be obtained by the (bottom-up) iteration of $\Gamma^{\ast}$ starting from
+the empty interpretation.
+\end{definition}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Revised Stable Models Semantics\cite{rsmMain}}
+
+\begin{definition}[\GFo] Let $P$ be a \nlp and $I$ a \twovi. The
+GL-transformation of $P$ modulo $I$ is the  program $\frac{P}{I}$ obtained from
+$P$ by performing the following operations:
+\begin{itemize}
+\item remove from $P$ all rules which contain a default literal $not\ A$ such
+that $A\in I$;
+\item remove from the remaining rules alll default literals.
+\end{itemize}
+
+Fixed points of the \GFo $\Gamma$ for a program $P$ are always models of $P$.
+
+As a shorthand notation, let $WFM(P)$ denote the positive atoms of the
+Well-Founded Model of $P$, that is WFM(P) is the least fixpoint of operator
+$\Gamma_{p}^{2}$\cite{wfsFixpoint}, i.e., $\Gamma_{p}$ applied twice.
+\end{definition}
+
+
+\begin{definition}[Sustainable Set] Intuitively, we say a set $S$ is sustainable
+in $P$ if and only if any atom $A$ in $S$ does no go against the well-founded
+consequences of the remaining atoms in $S$ whenever $S\{A\}$ itself is a
+sustainable set. The empty set by definition is sustainable. ``Not going
+against'' means that atom $A$ cannot be false ($A$ is true or undefined) in the
+well-founded model of $P\cup S\setminus\{A\}$, i.e., it belongs to set
+$\Gamma_{P\cup S\setminus\{A\}}(WFM(P\cup S\setminus\{A\}))$
+
+Formally we say $S$ is sustainable if and only if:
+
+\begin{center}
+\begin{math}
+\forall_{a\in s} S\setminus A\ is\ sustainable\Rightarrow a\in \Gamma_{P\cup
+S\setminus\{A\}}\left(WFM\left(P\cup S\setminus\{A\}\right)\right)
+\end{math}
+\end{center}
+
+If $S$ is empty the condition is trivially true.
+\end{definition}
+
+
+\begin{definition}[Revised \SMs and Semantics] Let $RAA_{P}(M)\equiv
+M-\Gamma_{P}(M)$. $M$ is a Revised Stable Model of an Normal \LP $P$, if and
+only if:
+\begin{itemize}
+\item $M$ is a minimal classical model, with ``$\sim$'' interpreted as classical
+negation;
+\item $\exists_{\alpha\ge 2}$ such that $\Gamma_{P}^{\alpha}(M)\supseteq
+RAA_{P}(M)$
+\item $RAA_{P}(M)$ is sustainable.
+\end{itemize}
+
+The Revised \SMs is the intersection of its models, just as in the \SM
+semantics.
+
+\end{definition}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Disjunctive Well-Founded Semantics\cite{wfsdMain}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% ---- Bibliography ----
+%
+
+\newpage
+\bibliographystyle{abbrv}
+\bibliography{cabula}
+
+
+\end{document}

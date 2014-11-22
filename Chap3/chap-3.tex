@@ -1,0 +1,669 @@
+%#################################################################
+%% CHAPTER 3.
+%%#################################################################
+\chapter{Revised Well-Founded Semantics}
+\label{cha:rwfs}
+
+\begin{ChapAbstract} 
+Where we propose the \RWFS and explore its properties. We present a declarative definition, relate it with previous concepts and semantics, and show some basic examples of its calculation. Most of the results in this chapter are then further explored in chapter \ref{cha:grExtension}.
+\end{ChapAbstract}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{A Motivation for the \RWFS} 
+\label{sec:motivRWFS}
+As we've discussed in the previous chapter, we have three main semantics available for reasoning with \nlps, relevant for the context of this work. Two of these semantics (SMs and WFS) complement each other, by offering different levels of expressiveness and skepticism and by allowing an acceptable transition between two-valued and three-valued models. The other one (rSMs), extends the \sms semantics by introducing a new notion of support (\raa) in \nlps and thus solving the problems the SMs had. We now discuss the motivation for the introduction of a \rwfs, by identifying the main problems it should solve and the additional properties it will bring to the family of semantics with RAA support.
+
+As we've seen, unlike the \sms semantics, the \wfs is well defined for all \nlps. Every \nlp has a \wfm that specifies its meaning with three truth values where it states the truth, falsity and undefinedness of literals. Under the WFS, atoms are said to be true if and only if they are undoubtfully true, i.e., they have classical support and when transitioning to a two-valued context with several (possible) models, they are true in all models. That being so, literals are said to be undefined if they fall in one of the following cases:
+
+\begin{itemize}
+	\item Either the literals are part of a two-valued choice (true in some worlds, false in others) but never undeniably true or false;
+	\item Or the literals are not classically supported;
+	\item Or the literals depend on an already undefined literal.
+\end{itemize}
+
+Otherwise, they are false.
+
+It's easy to see that literals that are part of choices should be undefined -- choices are made in a two-valued context so things are either true or false. In a three-valued context, as they can't be true and false at the same time they remain undefined. Additionally, if a literal depends on an already undefined literal it should also be undefined as undefinedness propagates throughout the program. However, lack of classical support could be overcome by the introduction of another form of support. This will be our first motivation.
+
+Recalling the example programs in chapter \ref{cha:introduction} (page \pageref{cha:introduction}), by employing the additional form of support by absurdity (following the principle of \raa), programs with certain patterns\footnote{We will introduce these patterns formally in the next section.} could have their truth value defined, thus resulting on more expressive results. Note that we are not claiming that the \wfs is not expressive enough; on the contrary, we are claiming that if we enabled the WFS with an additional form of support, this would result on a more expressive semantics as it would be capable of giving the intended meaning to certain specific program patterns. By introducing the rWFS, we will have a way of, in a three-valued scenario, transitioning from a semantics merely based on the classical notion of support to one with both the classical and the RAA notion of support. This is our first motivation, study the introduction of the RAA notion of support in the WFS. 
+
+Moreover, by employing this form of support, the \rwfs would also be capable of relating with the \rsms semantics, and therefore defining a proper way of transitioning between a three-valued context to a two-valued context with RAA-support. We then argue that this is our second motivation for the introduction of the rWFS, the definition of a three-valued counterpart for the rSMs which, by making use of the \raa form of support, provides a more expressive result than the WFS on certain specific program patterns.
+
+From these two motivations, we can see that the introduction of this semantics is heavily related with the notion of undefinedness. We argue that literals which should have the undefined value are those that fall in one of the following cases:
+
+\begin{enumerate}
+	\item Either are true in some worlds and false in others, but never are undoubtfully true nor false;
+	\item Depend on an atom which already has an undefined truth value.
+\end{enumerate}
+
+As a consequence, this results in a more expressive result for the rWFS when compared with the WFS: the universe of undefined literals, given a certain NLP, no longer includes those literals that can be solved by \raa.
+
+Another consequence resulting from the introduction of the rWFS is the possibility of defining the \RPSMs, in opposition to the \PSMs. The \PSMs (PSMs) represent the universe of choices which can be made in undefined literals when transitioning from the \wfm to the \sms. If the notion of RAA is not present, some programs will have paths that will never reach a \sm, because of the presence of patterns which can only be solved by RAA. The introduction of a \rwfs will allow a correct transition from the single rWFM to the several rSMs, only by performing choices on the undefined literals. Note that this is precisely the point -- undefined literals will now \emph{only} represent choices that can be made and those choices will correspond to the several \rsms.
+
+Given this motivational scenario, the \rwfs will allow us to maintain two important parallels with the existing semantics:
+
+\begin{enumerate}
+	\item It will correspond to the \wfs with the \raa notion of support;
+	\item It will be a three-valued counterpart of the \rsms.
+\end{enumerate}
+
+Moreover, the \rwfs should be able to solve the following problems:
+
+\begin{enumerate}
+	\item Be able to give a correct meaning to programs which require the \raa form of support;
+	\item Allow for a correct transition between a three-valued scenario to a two-valued one, where both scenarios share the \raa notion of support;
+	\item Allow the correct transition from a three-valued scenario without RAA support to one with RAA support.
+\end{enumerate}
+
+At the same time, it will have the following additional properties:
+
+\begin{enumerate}
+	\item Provide more expressive results than the \wfs, due to its ability to revise the truth value of literals that were undefined but did not corresponded to choices in a two-valued context;
+	\item Allow for a complete definition of the \rpsms, where the path between the rWFM and the rSMs always exists and is only the result of choices on undefined literals.
+\end{enumerate}
+
+Therefore, we propose that a \rwfs for \nlps should have, at least, the following properties:
+
+\begin{itemize}
+\item Be definable in a declarative way, by relating the principle of \raa with the \wfs;
+\item Be also definable by a monotonic and continuous \fpo;
+\item Always be defined for any \nlp (existence of the \rwfm), and be uniquely defined (uniqueness of the \rwfm);
+\item Comply with the properties of cumulativity and relevancy;
+\item Maintain the polynomial complexity of the \wfs, regarding the calculation of the \rwfm;
+\item Coincide with the \wfs for \nlps with no OLONs nor ICONs.
+\end{itemize}
+
+We believe this is the best starting point for studying the application of the RAA notion of support in a three valued scenario, as it allows us to start by comparing it with the existing semantics, study the relations existing between them and contextualize it within the existing work on semantics
+for \nlps.
+
+We will continue this chapter by setting the principles and definitions this semantics is based on, most of them extended versions of the ones presented in \cite{ampMSc}, and then continue defining it in a declarative way. At the end of this definition we'll show how it keeps the properties we just set as essential and then show some calculation examples of this semantics. We finish with some conclusions and open issues.
+
+
+\section{Preliminary Definitions}
+\label{subsec:preliminary}
+We now proceed with the definition of several OLON and ICON patterns, which basically consist of their syntactic structure. These definitions are extended versions of the ones presented in \cite{ampMSc}.
+
+
+\subsection{\OLONs}
+Regarding OLONs, the simplest OLON possible is:
+\begin{align*}
+ P=\{\lambda_{0}& \leftarrow\sim \lambda_{0}\}
+\end{align*}
+
+This kind of OLON can be extended with an arbitrarily long chain of rules between $\lambda_{0}$ and $\sim \lambda_{0}$ like:
+\begin{align*}
+P=\{ & \lambda_{0}  \leftarrow \lambda_{1}\\
+ & \lambda_{1}  \leftarrow \lambda_{2}\\
+ & \lambda_{2}  \leftarrow \ldots\\
+ & \ldots \leftarrow \lambda_{n}\\
+ & \lambda_{n} \leftarrow \sim \lambda_{0}\}
+\end{align*}
+
+We call the set of atoms $\lambda_{i}\text{ }\left(1\leq i\leq n\right)$ the RAA chain of support for the OLON where $\lambda_{0}$ is the head of the OLON. Additionally, every rule in the OLON may have a finite arbitrarily long conjunction of literals:
+\begin{align*}
+P=\{ &\lambda_{0}  \leftarrow \lambda_{1}, PC_{1}\left(\lambda_{0}\right)\\
+ &\lambda_{1}  \leftarrow \lambda_{2}, PC_{2}\left(\lambda_{0}\right)\\
+ &\lambda_{2}  \leftarrow \ldots\\
+ &\ldots  \leftarrow \lambda_{n}, PC_{n}\left(\lambda_{0}\right)\\
+ &\lambda_{n}  \leftarrow \sim \lambda_{0}, PC_{n+1}\left(\lambda_{0}\right)\}
+\end{align*}
+
+where $PC_{j}\left(\lambda_{0}\right)\text{ }(1\leq j\leq n+1)$ is the conjunction of literals of the rule with head $\lambda_{j-1}$ in the OLON. We call these rules the preconditions of the OLON and refer to it as $PC_{j}\left(\lambda_{0}\right)$ to mean the precondition of rule $j$ for the OLON with the head $\lambda_{0}$. The head of the OLON is the literal which is actually provable by RAA, and we call it the core of this OLON. Indirect OLONs, as we'll see, may have several cores, one for each rSM. As long as all $PC_{j}\left(\lambda_{0}\right)$ are true, the OLON is in effect and $\lambda_{0}$ is true by RAA reasoning as it depends on its own negation. We call this kind of OLON a direct OLON since it has only one negative literal in its chain of support.
+
+An indirect OLON is one where the number of negative literals present in the RAA chain of support is odd and greater than one. Essentially, just assume that some $\Lambda_{i}, \left(0\leq i\leq n\right)$ literals are default negated $\lambda_{i}$ literals, i.e., $\Lambda_{i}=\lambda_{i}\vee\Lambda_{i}=\sim\lambda_{i}$:
+\begin{align*}
+P=\{ &\lambda_{0}  \leftarrow \Lambda_{1}, PC_{1}\left(\lambda_{0}\right)\\
+&\lambda_{1}  \leftarrow \Lambda_{2}, PC_{2}\left(\lambda_{0}\right)\\
+&\lambda_{2}  \leftarrow \ldots\\
+&\ldots  \leftarrow \Lambda_{n}, PC_{n}\left(\lambda_{0}\right)\\
+&\lambda_{n}  \leftarrow \sim\lambda_{0}, PC_{n+1}\left(\lambda_{0}\right)\}
+\end{align*}
+
+Assuming all $PC_{j}\left(\lambda_{0}\right)$ are true, the meaning associated with this OLON corresponds to each $\lambda_{i}, \left(0\leq i\leq n\right)$ being true (along with several consequences that follow from each $\lambda_{i}$). In order for each $\lambda_{i}$ to be provable by RAA, all $PC_{k}\left(\lambda_{0}\right)$ must be true, with $k=\{i,i+2,i+4,\ldots\}$\footnote{Result from \cite{ampMSc}}. This kind of OLON has, at most, $n$ \rsms, all indirectly supported.
+
+So, formally we have:
+
+\begin{definition}[\OLON (OLON)]
+\label{def:olon}
+An OLON is a set of rules in the form
+\begin{align*}
+ \lambda_{0} &\leftarrow \Lambda_{1}, PC_{1}\left(\lambda_{0}\right)\\
+ \lambda_{1} &\leftarrow \Lambda_{2}, PC_{2}\left(\lambda_{0}\right)\\
+ \lambda_{2} &\leftarrow \ldots\\
+ \ldots &\leftarrow \Lambda_{n}, PC_{n}\left(\lambda_{0}\right)\\
+ \lambda_{n} &\leftarrow \Lambda_{0}, PC_{n+1}\left(\lambda_{0}\right)
+\end{align*}
+
+with $\Lambda_{i},\left(0\leq i\leq n\right)$ being either $\lambda_{i}$ or $\sim\lambda_{i}$ and the number of negative literals in the RAA chain of support being odd. Additionally, it should hold that:
+\begin{align*}
+		\forall_{r_{1}\in OLON},\exists_{r_{2}\in OLON}: & \alpha \in head\left(r_{1}\right) \wedge\\
+										( &\alpha\in tail\left(r_{2}\right) \vee \sim\alpha\in tail(r_{2}))
+\end{align*}
+
+We call the set $\{PC_{1}\left(\lambda_{0}\right),\ldots,PC_{n+1}\left(\lambda_{0}\right)\}$ the set of preconditions of the OLON and the set $\{\Lambda_{0}, \Lambda_{1},\ldots,\Lambda_{n}\}$ the RAA chain of support for $\lambda_{0}$.
+
+We will refer to all the preconditions of an OLON with head $\alpha$ as the set $PCs(\alpha)$.
+
+Additionally, we say that an OLON is active or in effect, meaning that its head $\alpha$ can be concluded by \raa, iff all the atoms in $PCs(\alpha)$ are true.
+\end{definition}
+
+We can also provide a definition for an indirect OLON and how we are going to represent it.
+
+\begin{definition}[Indirect OLON]
+An OLON $O$ is an indirect OLON iff the number of negative literals of $O$ is greater than one (written $NNL(O) > 1$). An indirect OLON can be represented in the form
+\begin{align*}
+OLON^{i}\left(\{a_{1},a_{2},\ldots,a_{n} \}\right)
+\end{align*}
+
+with $a_{1},a_{2},\ldots,a_{n} $ being the several possible heads of the OLON. Note, therefore, that an indirect OLON has several possible heads.
+\end{definition}
+
+Additionally, we can also provide the definition of a direct OLON, and how it can be represented.
+
+\begin{definition}[Direct OLON]
+\label{def:dOLON}
+An OLON $O$ is a Direct OLON iff the number of negative literals of $O$ is one (written $NNL(O) = 1$). A direct OLON can be represented in the form
+\begin{align*}
+OLON^{d}\left(a\right)
+\end{align*}
+
+with $a$ being the head of the OLON. 
+
+\end{definition}
+
+From the previous definition results the definition of all the direct OLONs in a \nlp.
+
+\begin{definition}[Set of All Direct OLONs of a NLP]
+Given a NLP $P$, the set $OLs$ is the set of all Direct OLONs of $P$, written $OLONS_{P}^{d}=\{\alpha_{1},\alpha_{2},\ldots,\alpha_{n}\}$, iff:
+\begin{align*}
+OLONS_{P}^{d}=\{\alpha_{i}:OLON^{d}\left(\alpha_{i})\right), (1\leq i\leq n)
+\end{align*}
+with each $\alpha_{n}$ being the head of each direct OLON.
+\end{definition}
+
+
+
+
+
+\subsection{\ICONs}
+Another pattern that can be solved by RAA, and is also treated as undefined in the \wfs, are \icons (ICONs). The notion of ICON was first identified by François Fages in \cite{fages} as an example of a NLP which although not having any OLON still had no stable models:
+\begin{align*}
+P=\{
+ p(X) & \leftarrow p(s(X))\\
+ p(X) & \leftarrow \sim p(s(X))
+\}
+\end{align*}
+
+The grounded version of this program is:
+\begin{align*}
+P=\{
+& p(0)\leftarrow p(s(0))\\
+& p(0)\leftarrow \sim p(s(0))\\
+& p(s(0))\leftarrow p(s(s(0)))\\
+& p(s(0))\leftarrow \sim p(s(s(0)))\\
+& p(s(s(0)))\leftarrow p(s(s(s(0))))\\
+& p(s(s(0)))\leftarrow \sim p(s(s(s(0))))\\
+& \vdots\\
+\}
+\end{align*}
+
+The issue in this program is that each $p(X)$ is infinitely justified by each $p(s(X))$, and $p(s(X))$ by $p(s(s(X)))$ \ldots
+
+Reasoning by absurdity also takes place in ICONs. Let's consider any hypothesis $\sim p(X)$. For this hypothesis to be true, the tails of $p(X)\leftarrow\ldots$ would have to be false. In particular $\sim p(s(X))$ and $p(s(X))$ would have to be true. But this would turn $p(X)$ true, thus leading to a contradiction. So, by RAA, $p(X)$ must be true for all $X$.
+
+This simple version of an ICON can be expanded in the following way:
+\begin{align*}
+P=\{
+& p(X)\leftarrow \lambda_{1}, PC_{\lambda_{1}}				&			& p(X)\leftarrow \mu_{1}, PC_{\mu_{1}} \\
+& \lambda_{1}\leftarrow \ldots												&			& \mu_{1}\leftarrow \ldots \\
+& \ldots\leftarrow \lambda_{n}, PC_{\lambda_{n}}			&			& \ldots\leftarrow \mu_{m}, PC_{\mu_{m}} \\
+& \lambda_{n}\leftarrow p(s(X)), PC_{\lambda_{n+1}}		&			& \mu_{m}\leftarrow \sim p(s(X)), PC_{\mu_{m+1}} 
+\}
+\end{align*}
+
+where the meaning is always the same: $p(X)$ must be true, either by the chain of $\lambda_{i}, (1\leq i\leq n)$ or by the one of $\mu_{j} (1\leq j\leq m)$, provided that all the tails for the chain in question are true. As $p(X)$ ends up depending on mutually exclusive literals, $p(s(X))$ and $\sim p(s(X))$, either one of them has to be true, rendering $P(X)$ inevitably true.
+
+
+
+
+%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%% ESTE EU QUERIA ESCREVER.......
+
+%Althoug hthere is no chain of support between $\sim p(X)$ and $p(X)$, the same reasoning principle can be applied. This further enforces the idea that RAA is a principle, more than a simple syntactic 
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%
+
+\begin{definition}[\ICON (ICON)]
+\label{def:icon}
+An ICON is an infinite set of rules in the form 
+\begin{align*}
+ \alpha &\leftarrow \lambda_{1}, PC_{\lambda_{1}}		&			 \alpha & \leftarrow \mu_{1}, PC_{\mu_{1}} \\
+ \lambda_{1} &\leftarrow \ldots											&			 \mu_{1} & \leftarrow \ldots \\
+ \ldots &\leftarrow \lambda_{n}, PC_{\lambda_{n}}		&			 \ldots & \leftarrow \mu_{n}, PC_{\mu_{n}} \\
+ \lambda_{n}& \leftarrow \beta, PC_{\lambda_{n+1}}	&			 \mu_{n} & \leftarrow \sim \beta, PC_{\mu_{n+1}} 
+\end{align*}
+
+We call $\alpha$ the \emph{head of the ICON} and represent the ICON as $ICON_{P}(\alpha)$, where the meaning is: $\alpha$ is true by RAA if both of the sets $PCs_{\lambda}$ or $PCs_{\mu}$ are true.
+
+\end{definition}
+
+Let's now define the set of all ICONs of a given NLP:
+
+\begin{definition}[\ICONs of a NLP]
+Given a NLP $P$, $ICs$ is the set of all literals of $P$ which are heads of \ICONs, written $ICONS_{P}=\{\alpha_{1},\alpha_{2},\ldots,\alpha_{n}\}$ iff:
+\begin{align*}
+ICONS_{P}=\{x:ICON_{P}(x)\}
+\end{align*}
+
+\end{definition}
+
+
+\begin{definition}[Preconditions function]
+Given any literal $S$ where $S$ is the head of an RAA pattern, $PC(S)$ is the set of all preconditions of $S$.
+\end{definition}
+
+
+
+
+\section{Declarative Semantics}
+We proceed now with the declarative definition of the \rwfs. In this definition we recall the principle of \raa, which states that if by assuming some hypothesis as false that assumption leads us to a contradiction, then our hypothesis must be revised to true. 
+
+This is the principle used in the definition of the rSMs, the first of this \emph{revised} family of semantics. The question now is if this principle is still valid in a three-valued context.
+
+Following the same ideas behind the \rsms semantics, the \rwfs intends to use RAA reasoning to revise literals that can't be false into true ones. However, now that we have three values of truth available to chose from, why should those literals be revised to true instead of undefined?
+
+Let's start by looking at a simple case: 
+\begin{align*}
+P=\{a & \leftarrow\sim a\}
+\end{align*}
+
+By reasoning by absurdity we say that $a$ can't be false because that would lead us to a contradiction. We now have two truth values at our disposal, true and undefined. At this point, we argue that the undefined truth value should mean that there would be some worlds where $a$ would be true and others where $a$ would be false. However, we already seen that $a$ cannot be false in any world, so it is not correct to opt for the undefined value. By absurdity, the only value we can chose from is true. Let's enunciate this principle:
+
+
+\begin{definition}[Reductio ad absurdum with three truth values]
+Consider a \nlp $P$ in a three-valued context. Additionally, consider that in this three-valued context the value of undefined is assigned to literals which depend on an already undefined literal or literals which are either true or false in a two-valued context.
+
+We say that any literal $\alpha$ is true by the principle of \raa if we have to assume its falsity $\sim \alpha$ in order to conclude $\alpha$. 
+
+The reasoning behind this principle is the following: we start by considering the hypothesis $\sim\alpha$ and assume that it allows us to conclude $\alpha$, which is an absurd. We now say that $\alpha$ should be true instead of undefined because by undefined we would be considering the hypothesis that $\alpha$ might be false in some worlds, an hypothesis we already seen that is not possible.
+
+This being the case, as $\alpha$ can't be false nor undefined it should be true by absurdity.
+\end{definition}
+
+Let's now see what results we want to revise in our semantics. Direct OLONs only have a single rSM associated with them so, as they don't represent choices, they should be true in the \rwfm, provided that their preconditions are true.
+
+Indirect OLONs have several rSMs, which represent the choices made in a two-valued context. The only way for an indirect OLON to always have a single model is if the other possible models have unsatisfied preconditions. This, however, breaks the OLON's chain of support, thus providing classical support for the indirect OLON. Therefore, indirect OLONs are not to be considered.
+
+ICONS, as we've previously seen, have the singularity of ending in contradictory tails, thus resulting on a single conclusion from this pattern. Therefore, ICONs are also to be considered for the rWFM.
+
+Given these principles, the only result we want to add to the WFS is the revision of undefined literals present in direct OLONs and ICONs, if they are in effect. An OLON or ICON is in effect if its preconditions set is acceptable, i.e., if each of these patterns depends on literals which either are already true in the model or, being undefined, will be revised to true after the application of the \raa principle. 
+
+We start by defining the set of RAA patterns which can be considered for the \rwfs:
+
+\begin{definition}[Considerable RAA Patterns set $RAA_{P}$]
+Let $P$ be a \nlp, $ICONS_{P}$ be the set of all \icons of $P$ and $OLONS_{P}^{d}$ be the set of all direct \olons of $P$. 
+
+We define the set $RAA_{P}$ of considerable RAA patterns of $P$ as:
+\begin{align*}
+RAA_{P} = heads(ICONS_{P}) \cup heads(OLONS_{P}^{d})
+\end{align*}
+
+$RAA_{p}$ is a set in the form $\{\alpha_{1},\alpha_{2},\ldots,\alpha_{n}\}$, with $\alpha_{i}, 1\leq i\leq n$ being the head of a given RAA pattern.
+\end{definition}
+
+We now define the set of acceptable preconditions for RAA patterns. This is the set of preconditions we are, in principle, willing to accept as valid ones for RAA patterns:
+
+\begin{definition}[Acceptable preconditions for a set of RAA patterns]
+Let $P$ be a \nlp, $RAA_{p}$ be the set of considerable RAA patterns of $P$ and $WFM_{P}=\langle \cal{T},\cal{TU} \rangle$ be the \wfm of $P$.
+
+We say that the literals which can be accepted as preconditions for RAA patterns form the set $accPC_{P}$, defined as:
+\begin{align*}
+accPC_{P} = \{{\cal{T}}_{WFM}\cup RAA_{P}\}
+\end{align*}
+\end{definition}
+
+We now define the relation of conformity between literals and preconditions. This relation will allow us to determine which RAA patterns have valid preconditions.
+
+\begin{definition}[Conformity between literals and preconditions]
+\label{def:conformity}
+Let $\check{=}$ mean the conformity between a literal and a set of preconditions $S$ and, symmetrically, $\check{\neq}$ mean the conflict between a literal and a set of preconditions. We say, without loss of generality, that, given a certain literal $X$ belonging to $S$:
+\begin{align*}
+X & \check{=} X 					 \\
+X & \check{\neq} \{\} 		 \\
+\sim X & \check{=} \{\} 	 \\
+\sim X & \check{=} X 			 \text{ iff } X \notin accRAA_{P}. \text{ Otherwise }\sim X \check{\neq} X
+\end{align*}
+
+Additionally, we say that all literals in a set $T=\{a_{1},\ldots,a_{n}\}$, with $n\geq 2$ are \emph{loop conflicting} (and therefore conflicting) if:
+
+\begin{align*}
+\forall_{a_{i}\in T},\exists_{a_{j}\in T}: & \sim a_{j} \in PC(a_{i}) \wedge\\
+																					 & a_{i}\neq a_{j} \wedge\\
+																					 & 1\leq i\leq n \wedge\\
+																					 & 1\leq j\leq n
+\end{align*}
+
+
+Finally, the empty set is never conflicting with anything.
+\end{definition}
+
+
+\begin{definition}[Acceptable RAA Patterns set $accRAA_{P}$]
+Let $P$ be a \NLP and $RAA_{P}$ be the set of considerable RAA patterns of $P$. 
+
+The acceptable RAA patterns of $P$ is the subset $accRAA_{P}$ of $RAA_{P}$ which is defined as:
+\begin{align*}
+\forall_{x\in RAA_{P}}, & x\in accRAA_{P}\text{ iff }\\
+                        & \forall_{a\in PC(x),b\in accPC_{P}}, a\check{=}b 
+\end{align*}
+
+\end{definition}
+
+What we've defined so far is a way of pruning the set of RAA patterns whose undefinedness we are willing to revise. Basically we accept RAA patterns whose preconditions are either true or undefined being that, if they are undefined, they should clearly be part of the acceptable RAA patterns set. A certain pattern is acceptable if its preconditions are in conformity with the acceptable preconditions set. 
+
+In order to better understand these definitions, let's consider the following example:
+
+\begin{align*}
+P=\{
+& a \leftarrow\sim a\\
+& b \leftarrow\sim a,\sim b
+\}
+\end{align*}
+
+and the sets generated from $P$
+\begin{align*}
+& RAA_{P} = \{a,b\}\\
+& accPC_{P} = \{\} \cup \{a,b\} = \{a,b\}\\
+& PC(a)=\{\}\\
+& PC(b)=\{\sim a\}
+\end{align*}
+
+We now intend to generate the set $accRAA_{P}$ with patterns whose preconditions are not conflicting. Let's see in detail what we mean by \emph{conflicting}: the first OLON has no preconditions, so it can be added directly to $accRAA_{P}$, because $\{\}$ is in conformity with everything. The second OLON has a precondition of $\sim a$, which conflicts with one of the literals in $accPC_{P}$. Therefore it will not be part of $accRAA_{P}$.
+
+Let's consider another example:
+
+\begin{align*}
+P=\{
+& a \leftarrow\sim a,z\\
+& b \leftarrow\sim a,\sim b
+\}
+\end{align*}
+
+and the sets generated from $P$
+
+\begin{align*}
+& RAA_{P} = \{a,b\}\\
+& accPC_{P} = \{\} \cup \{a,b\} = \{a,b\}\\
+& PC(a)=\{z\}\\
+& PC(b)=\{\sim a\}
+\end{align*}
+
+The second OLON has a precondition of $\sim a$. By the fourth rule of definition \ref{def:conformity}, $\sim a\check{=}a$ iff $a \notin accRAA_{P}$. Then let's see if $a$ belongs to $accRAA_{P}$. The first OLON has a precondition of $z$. As $z\notin accPC_{P}$, we have that $z \check{\neq} \{\}$, and therefore $a\notin accPC_{P}$. Therefore, $b\in accRAA_{P}$.
+
+This demonstrated the generation of the $accRAA_{P}$ set. We now define the \rwfs for \nlps:
+
+\begin{definition}[\RWFM and Semantics]
+\label{def:rwfs}
+Let $P$ be a \nlp, $WFM_{P}$ be the \wfm of $P$ and $accRAA_{P}$ be the set of acceptable RAA patterns of $P$.
+
+The \rwfm of $P$ is the the tuple $\langle{\cal{T}}^{r},{\cal{TU}}^{r}\rangle$ where ${\cal{T}}^{r}$ corresponds to the true literals under the \rwfs and ${\cal{TU}}^{r}$ corresponds to to true or undefined literals under the \rwfs. The \rwfm of $P$ is the \wfm of the NLP $P\cup\left(accRAA_{P}\cap {\cal{TU}}_{WFM}\right)$. Formally we have:
+\begin{align*}
+rWFM_{P} = WFM_{P\cup \left(accRAA_{P}\cap {\cal{TU}}_{WFM}\right)}
+\end{align*}
+
+Under the \rwfs, an atom is true if it belongs to the set \tRWFM, is undefined if it belongs to the set \tuRWFM$\setminus$\tRWFM and is false if it doesn't belong to \tuRWFM.
+\end{definition}
+
+Let's examine this definition in more detail. The intuition we are following is that if certain literals obey certain conditions they should be added to the program as facts and the program's WFM should calculated so that the interference of these facts may be considered.
+
+The first part of the set of facts we're adding, $accRAA_{P}$, derives from the previous definitions. Knowing that we already have a set of acceptable RAA patterns, whose preconditions are either true or some considerable RAA pattern, we are willing to add them to the program as these are the kind of patterns we are revising.
+
+However, we intersect this set with the true or undefined set that comes from the WFM -- ($accRAA_{P}\cap {\cal{TU}}_{WFM}$). The reason for this is that even if a certain literal is part of a direct OLON or an ICON and its preconditions are acceptable, if by some other reason the OLON is false in the \wfm it should never be revised to true. Recalling the idea behind this thesis, what is intended with this semantics is precisely the revision of undefined literals, those that while not proven to be undoubtfully false, can't be proven to be true by the classical notion of support. So all the literals we're interested in are in the \tuWFM set. By intersecting the set $accRAA_{P}$ with \tuWFM we make sure that the only atoms we're adding are those that, more than just being provable by RAA reasoning, are not undoubtfully false.
+
+Finally, we join this set of facts with the original program -- $P\cup \left(accRAA_{P}\cap {\cal{TU}}_{WFM}\right)$. This is done because of the extensive nature of the rWFS, i.e., it extends the WFS for NLPs with OLONs or ICONs but it provides the same results as the WFS in a NLP without such patterns. In other words, all that was true in WFS will never cease to be true. What can happen is the revision of certain undefined literals to true and others to false because of the additional form of support now available. Moreover, the atoms that come from the set $accRAA_{P}\cap {\cal{TU}}_{WFM}$ will never contradict the atoms in the set ${\cal{T}}_{WFM}$ as they already were true or undefined under the WFS. This means that, either they were already true, and their value remains, or they were undefined, and in that case all relevant atoms regarding those were also undefined.
+
+This ends our declarative definition of the \rwfs. We now present the properties this semantics enjoys and proceed with a set of illustrative examples.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Properties}
+We now demonstrate in detail the proofs for the main properties we claim the rWFS enjoys.
+
+
+
+
+\subsection{\WFS Extension for Programs Without RAA Patterns}
+Given a \NLP $P$ without any of the RAA patterns identified in section \ref{subsec:preliminary}, $M$ the \wfm of $P$ and $M^{r}$ the \rwfm of $P$, we will prove that $rWFM_{P}(M^{r})\Leftrightarrow WFM_{P}(M)$:
+
+\begin{theorem}[\RWFS extends \WFS for programs without RAA Patterns]
+\label{th:wfsExtension}
+Consider $M=\langle\cal{T},\cal{TU}\rangle$ the \wfm of a NLP $P$, denoted by $WFM_{P}$. Additionally consider $M^{r}=\langle{\cal{T}}^{r},{\cal{TU}}^{r}\rangle$ the \rwfm of $P$, denoted by $rWFM_{P}$ where the sets of considerable RAA patterns is empty: $RAA_{P}=\emptyset$.
+
+It holds that $M = M^{r}$.
+
+\begin{proof}
+Considering the declarative definition of the rWFS we have that $M^{r} = WFM_{P\cup \left(accRAA_{P}\cap {\cal{TU}}_{WFM}\right)}$, being that $accRAA_{P}$ is a subset of $RAA_{P}$. However, we also know that $RAA_{P}=\emptyset$ and therefore $accRAA_{P}=\emptyset$. Then,
+\begin{eqnarray}
+								&WFM_{P}(M)& = rWFM_{P}(M^{r}) \Leftrightarrow\\
+\Leftrightarrow	&WFM_{P}(M)& = WFM_{P\cup \left(accRAA_{P}\cap {\cal{TU}}_{WFM}\right)}(M^{r}) \Leftrightarrow\\
+\Leftrightarrow	&WFM_{P}(M)& = WFM_{P\cup \left(\emptyset\cap {\cal{TU}}_{WFM}\right)}(M^{r})\Leftrightarrow\\
+\Leftrightarrow	&WFM_{P}(M)& = WFM_{P\cup\emptyset}(M^{r}) \Leftrightarrow\\
+\Leftrightarrow	&WFM_{P}(M)& = WFM_{P}(M^{r})\\
+\Leftrightarrow	&M& = M^{r}
+\end{eqnarray}
+\end{proof}
+\end{theorem}
+
+
+\subsection{Existence and Uniqueness of Model}
+The existence and uniqueness of model are two notions that derive directly from the \wfs, i.e., these are two properties that the WFS enjoys and that it's intended for the rWFS to enjoy as well.
+
+\begin{theorem}[The \RWFM always exists and is unique]
+\label{th:existence}
+Consider a \nlp $P$, where $WFM_{P}(M)$ denotes the program's \wfm and $rWFM_{P}(M^{r})$ denotes the program's \rwfm.
+
+$M^{r}$ always exists and is unique.
+
+\begin{proof}
+Theorem \ref{th:wfsExtension} proved that if $P$ has no RAA Patterns, its rWFM corresponds to its WFM. This being the case, it is trivially proven that its rWFM always exists and is unique because being its WFM, it already enjoys the properties of existence and uniqueness.
+
+Furthermore, if $P$ has any of the RAA Patterns we are considering for the rWFS, we already now that its rWFM is the WFM of a transformed program with some literals added as facts. This being the case, the rWFS is again given by the WFS, a semantics that already enjoys the properties of existence and uniqueness of model.
+\end{proof}
+\end{theorem}
+
+
+\subsection{Cumulativity}
+Consider $rWFM_{P}(M^{r})=\langle{\cal{T}}^{r},{\cal{TU}}^{r}\rangle$ the \rwfm of a \nlp $P$. The property of cumulativity states that if any atom $a$ belongs to ${\cal{T}}^{r}$, it can be added to the original program $P$ as a fact and the semantics of $P$ will remain the same. Formally
+
+\begin{align*}
+\forall_{a,b\in{\cal{T}}^{r}}: & rWFM_{P\cup\{a\}}=\langle{\cal{T}}^{r'},{\cal{TU}}^{r'}\rangle \wedge\\
+															 & b \in {\cal{T}}^{r'}
+\end{align*}
+
+\begin{theorem}[The \RWFS is cumulative]
+\label{th:cumulativity}
+The \rwfs is a cumulative semantics.
+
+\begin{proof}
+We start with the case where $P$ has no RAA patterns whatsoever. We already seen that in this case $rWFS_{P}(M^{r})=WFS_{P}(M)$, so the property is trivially satisfied because the \WFS already is cumulative.
+
+This not being the case, we now that $rWFM_{P}(M^{r})=WFM_{P\cup \left(accRAA_{P}\cap {\cal{TU}}_{WFM}\right)}(M^{r})$, meaning that the \rwfs will be the result of the \wfs of a program to which we added a set of facts. This being the case, the property is again trivially satisfied as the WFS is cumulative.
+\end{proof}
+\end{theorem}
+
+
+\subsection{Relevancy}
+The property of relevancy states that the semantics of a NLP $P$ with respect to a set of literals $L$ only depends on the set of relevant rules of $P$ regarding $L$.
+
+We start by defining the set of relevant rules of a NLP regarding a literal\footnote{Definition borrowed from \cite{ampMSc}.}.
+
+\begin{definition}[Set of Relevant rules Rel(P,L)]
+Given a \nlp $P$ and a set of atoms $L$, the set of relevant rules $Rel(P,L)$ is defined as:
+\begin{align*}
+Rel(P,L) =  \{R_{i}\in P: & head(R_{i}) = a \wedge a\in L\} \cup\\
+            \{Rel(P,X):   & R_{i}\in P\wedge\\
+                          & head(R_{i})= a \wedge a\in L \wedge\\
+                          & \left(\left(X\in body(R_{i})\right)\vee \left(\sim X\in body(R_{i})\right)\right)\}
+\end{align*}
+
+\end{definition}
+
+Formally, and for the case of the \rwfs:
+\begin{align*}
+\forall_{L\subseteq M^{r}}:	& rWFS_{P}(M^{r})\Rightarrow\\
+												& SEM_{L}^{rWFS}(P) = SEM_{L}^{rWFS}(Rel(P,L))
+\end{align*}
+
+\begin{theorem}[The \RWFS is relevant]
+Let $SEM_{L}^{rWFS}(P)$ mean the semantics of all literals in set $L$ according to the rWFS\footnote{Recal from the definition of the \RWFS, in page \pageref{def:rwfs}.} and let $Rel(P,L)$ mean the set of rules relevant to a certain set $L$ of literals in $P$. Finally, it holds that the \WFS is relevant, i.e., 
+\begin{align*}
+\forall_{L\subseteq M}:	& WFS_{P}(M)\Rightarrow\\
+												& SEM_{L}^{WFS}(P) = SEM_{L}^{WFS}(Rel(P,L))
+\end{align*}
+
+The \rwfs is a relevant semantics.
+
+\begin{proof}
+With the results we have so far (theorems \ref{th:wfsExtension}, \ref{th:existence} and \ref{th:cumulativity}) we can say that if $P$ has no RAA Pattern, by theorem \ref{th:wfsExtension} the \rwfs is relevant.
+
+This not being the case, we have the set $accRAA_{P}$ non-empty. However, as the rWFS corresponds to the WFS of a transformed program $P\cup\left(accRAA_{P}\cap {\cal{TU}}_{WFM}\right)$, it will keep the property of relevancy, derived from the WFS.	
+\end{proof}
+\end{theorem}
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Examples}
+We now analyse some examples showing the results when applying the intuitions set forth in the declarative definition.
+
+
+
+\begin{example}[OLON with inner OLON\footnote{This example is due to Sérgio Lopes}]
+\label{ex:sergio1}
+In this example we have a direct OLON over $a$ with one of the literals in its chain of support also being an OLON ($x$).
+\begin{align*}
+P=\{			& a \leftarrow x						& 	& WFM_{P}(M)=\langle\{\},\{a,x,y\}\rangle \\
+					& x \leftarrow y, \sim x		& 	& RAA_{P}=\{a,x\}\\
+					& y\leftarrow \sim a	\}			& 	& accRAA_{P}=\{a\}\\
+					& 													&		&  \\
+P^{r}=\{	& a\leftarrow x							& 	& rWFM_{P}(M^{r})=\langle\{a\},\{a\}\rangle \\
+					& x\leftarrow y, \sim x			& 	&  \\
+					& y\leftarrow \sim a				& 	&	 \\
+					& a\leftarrow \}						&		& 
+\end{align*}
+
+It's easy to see that the precondition for $x$ is not valid as it doesn't belong to \tWFM $\cup RAA_{P}$. Therefore, $a$ is the only acceptable RAA pattern. As it intersects with \tuWFM it is added to the original program.
+\end{example}
+
+\begin{example}[Normal OLON]
+In this example we have an OLON over $a$ and several other literals dependending both positively and negatively on $a$. According to the \wfs, everything is undefined but, because the \rwfs  employs RAA reasoning, in the \rwfm all literals will end up defined.
+\begin{align*}
+P=\{			& a \leftarrow x					& 	& WFM_{P}(M)=\langle\{\},\{a,x,b,c,d\}\rangle \\
+					& x \leftarrow \sim a			& 	& RAA_{P}=\{a\}\\
+					& b \leftarrow \sim a			& 	& accRAA_{P}=\{a\}\\
+					& c \leftarrow \sim b			&		&  \\
+					& d \leftarrow \sim c	\}		&		&  \\
+					& 												&		&  \\
+P^{r}=\{	& a \leftarrow x			& 	& rWFM_{P}(M^{r})=\langle\{a,c\},\{\}\rangle \\
+					& x \leftarrow \sim a			& 	&  \\
+					& b \leftarrow \sim a			& 	&	 \\
+					& c \leftarrow \sim b			&		&  \\
+					& d \leftarrow \sim c			&		&  \\
+					& a \leftarrow \}&		&  
+\end{align*}
+\end{example}
+
+\begin{example}[OLON with an undefined dependency]
+In this program we have an odd loop over $a$ which depends positively on the odd loop over $b$. This example shows that the \rwfs can correctly deal with this dependency although the dependency of $b$ is an undefined one.
+\begin{align*}
+P=\{			& a\leftarrow b, x			& 	& WFM_{P}(M)=\langle\{\},\{a,b,x\}\rangle \\
+					& x\leftarrow \sim a				& 	& RAA_{P}=\{a,b\}\\
+					& b\leftarrow \sim b\}				& 	& accRAA_{P}=\{a,b\}\\
+					& 													&		&  \\
+P^{r}=\{	& a\leftarrow b, x			& 	& rWFM_{P}(M^{r})=\langle\{a,b\},\{\}\rangle \\
+					& x\leftarrow \sim a					& 	&  \\
+					& b\leftarrow \sim b					& 	&	 \\
+					& a\leftarrow 				&		& \\
+					& b\leftarrow \}				&		& 
+\end{align*}
+\end{example}
+
+\begin{example}[Indirect \OLON]
+This example shows an indirect OLON. As indirect OLONs are never considered for the set $RAA_{P}$, no modification is ever done to the program so $rWFM_{P}(M^{r}) = WFM_{P}(M)$.
+\begin{align*}
+P=\{			& a\leftarrow\sim b				& 	& WFM_{P}(M)=\langle\{\},\{a,b,c\}\rangle \\
+					& b\leftarrow	\sim c						& 	& RAA_{P}=\{\}\\
+					& c\leftarrow \sim a	\}					& 	& accRAA_{P}=\{\}\\
+					& 													&		&  \\
+P^{r}= P	& 												& 	& rWFM_{P}(M^{r})=WFM_{P}(M)=\langle\{\},\{a,b,c\}\rangle \\
+					& & 	&  \\
+					& & 	&	 \\
+					& &		& 
+\end{align*}
+\end{example}
+
+\begin{example}[Direct OLON with illegal precondition]
+This program shows an OLON which will never be part of the model because it depends negatively on another OLON. Note that all OLONs were undefined and in the rWFS, as one of them is revised to true, the other is revised to false.
+\begin{align*}
+P=\{			& a\leftarrow\sim a					& 	& WFM_{P}(M)=\langle\{\},\{a,b\}\rangle \\
+					& b\leftarrow\sim b,\sim a\}	& 	& RAA_{P}=\{a,b\}\\
+					& 													& 	& accRAA_{P}=\{a\}\\
+					&													  &		&  \\
+					& 													&		&  \\
+P^{r}=\{	& a\leftarrow\sim a					& 	& rWFM_{P}(M^{r})=\langle\{a\},\{a\}\rangle \\
+					& b\leftarrow\sim b,\sim a	& 	&  \\
+					& a\leftarrow 		\}				& 	&	 
+\end{align*}
+\end{example}
+
+
+
+\begin{example}[An OLON with another OLON inside\footnote{This example is due to Sérgio Lopes}]
+In this example we have two OLONs, being that the one of $x$ is inside the one of $a$. $a$ will end up being part of the rWFM, not by RAA but by classical reasoning, although it is part of the acceptable OLONs.
+\begin{align*}
+P=\{			& a \leftarrow x					& 	& WFM_{P}(M)=\langle\{\},\{a,x,y\}\rangle \\
+					& x \leftarrow y					& 	& RAA_{P}=\{a,x\}\\
+					& y \leftarrow \sim a			& 	& accRAA_{P}=\{a,x\}\\
+					& y \leftarrow \sim x	\}		&		&  \\
+					& 												&		&  \\
+P^{r}=\{	& a \leftarrow x					& 	& rWFM_{P}(M^{r})=\langle\{a,x\},\{a,x\}\rangle \\
+					& x \leftarrow y					& 	&  \\
+					& y \leftarrow \sim a			& 	&	 \\
+					& y \leftarrow \sim x			&		& \\
+					& a \leftarrow 						&		& \\
+					& x \leftarrow 			\}			&		& 
+\end{align*}
+\end{example}
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Concluding remarks}
+
+In this chapter we proposed and defined the \rwfs. We showed that this definition extends the \wfs in its properties and results, and corresponds to the ideas we set in the beginning of this chapter. The definition of what is a \rwfm recurs only to the ideas of OLONs and ICONs which, although being easy to reason about at a conceptual level, are not trivial to identify in larger, more complicated programs. Because of this, and the desire to further relate the rWFS with the \rsms, we present a transformational semantics for the rWFS in the next chapter, as well as a set of additional definitions and properties.
+
