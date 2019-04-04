@@ -1,0 +1,89 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% New commands and environments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{inumerate}{%
+  \begin{enumerate}[i)]
+}{%
+  \end{enumerate}
+}
+
+%\newenvironment{defi}[1]{\begin{definition}{#1}}{\end{definition}}
+%\usepackage{mytheorem}             % My own abbreviations
+
+\newcommand{\mycite}[1]{\cite{#1}}
+%%\newcommand{\mycite}[1]{[\textsf{#1}]}
+%%\newcommand{\mycite}[1]{[\textsf{#1}]\mnote{Ref:[\textsf{#1}]}}
+
+%%\newcommand{\mnote}[1]{}
+\newcommand{\mnote}[1]{\marginpar{%
+    \ifodd\thepage\hspace*{-0.3em}\else\hspace*{2em}\fi%
+    \fbox{%
+      \begin{minipage}[t]{0.7\marginparwidth}%
+        \centering\tiny #1%
+      \end{minipage}}%
+}}
+
+\newcommand{\itnote}[1]{}
+%%\newcommand{\itnote}[1]{\marginpar{%
+%%    \vspace*{1ex}
+%%    \begin{minipage}[t]{0.7\marginparwidth}%
+%%        $\triangleright$ \itshape\raggedright\footnotesize #1%
+%%      \end{minipage}%}}%
+%%}}
+
+
+\newenvironment{mycitation}{%
+  \raggedleft
+    \itshape
+}{%
+}
+
+%\newtheorem{spdefinition}{$\triangleright$ Definition}
+
+%\newenvironment{definition}[1]%
+%  { %% \begin{definition}
+%    \begin{spdefinition}[#1]
+%      \begin{quote}\mbox{}\\ \normalfont
+%  }{ %% \end{definition}
+%      \end{quote}
+%    \end{spdefinition}
+%  }
+
+
+  
+
+\newenvironment{ChapAbstract}{%
+  \minitoc
+  
+  %% begin{ChapAbstract}
+  \vfill
+  \noindent
+%%  \begin{quote}
+  \rule[0.75ex]{\linewidth}{1pt}
+%%  \vspace{-2ex}
+  \slshape
+}{%
+  %% end{ChapAbstract}
+%%  \vspace{-2ex}
+  \\
+  \rule{\linewidth}{1pt}
+%%  \end{quote}
+  \clearpage
+}
+
+%\newenvironment{ChapAbstract}%
+%{\begin{center}\begin{minipage}[c]{0.90\textwidth}\rule{\textwidth}{2pt}\slshape}%
+%{\\[-0.5ex]\rule{\textwidth}{2pt}\end{minipage}\end{center}}
+
+
+
+
+% =================================================================
+% Local variables:
+% TeX-master: "../tese.tex"
+% End:
+% =================================================================
+
+

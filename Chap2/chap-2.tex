@@ -200,12 +200,12 @@ During the last decades, these two semantics were extensively used and studied f
 \section{Enter the \RSMs}
 The drawbacks of the \sms semantics, described in the previous section, are dealt with in the \wfs but they aren't actually \emph{solved}. Only in 2004 Pinto and Moniz Pereira proposed\cite{rsmItaly} a way of solving the problems of the \sms and have been studying\cite{ampMSc,rsmEpia,rsmItaly} its aspects ever since.
 
-The Revised Stable Models (rSMs) is a semantics for NLPs which applies the principle of \RAA (RAA) to solve the main problems of the \sms semantics, namely inconsistency, cumulativity and relevancy. Inconsistency in SMs, as it was shown by François Fages\cite{fages}, comes from the existence of \olons (OLONs) in the program such as
+The Revised Stable Models (rSMs) is a semantics for NLPs which applies the principle of \RAA (RAA) to solve the main problems of the \sms semantics, namely inconsistency, cumulativity and relevancy. Inconsistency in SMs, as it was shown by FranÃ§ois Fages\cite{fages}, comes from the existence of \olons (OLONs) in the program such as
 \begin{align*}
 P=\{a\leftarrow\sim a\}
 \end{align*}
 
-François Fages goes on explaining that not only OLONs are the source of the problem for inconsistency, but also \icons (ICONs), as in the case of:
+FranÃ§ois Fages goes on explaining that not only OLONs are the source of the problem for inconsistency, but also \icons (ICONs), as in the case of:
 \begin{align*}
 P=\{& p(X)\leftarrow p(s(X))\\
 & p(X)\leftarrow\sim p(s(X))\}
@@ -257,7 +257,7 @@ As it was proven in \cite{ampMSc}, the \rsms enjoy not only the existence of mod
 This semantics and the additional notion of support it employs, somewhat change the map of \kr and \nmr semantics we have detailed so far.
 
 
-\begin{figure}[htbpc]
+\begin{figure}[htbp]
 	\centering
 		\includegraphics[width=0.55\textwidth]{Chap2/transitions.png}
 	\caption{\footnotesize Map of transition and relations between the existing semantics for \nlps. Note that in the blue area, on the left, we have two-valued semantics while in the red area, on the right, we have the three-valued semantics. Additionally, the bottom of the figure represents semantics with RAA support, while the top of the figure represents those without RAA support.}
